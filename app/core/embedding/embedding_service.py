@@ -6,11 +6,31 @@
 """
 import logging
 import time
+import os
+import re
 from typing import List, Dict, Any, Optional, Union
 import numpy as np
 
 # 配置日志
 logger = logging.getLogger(__name__)
+
+def replace_env_vars(value: str) -> str:
+    """替换字符串中的环境变量引用"""
+    if not isinstance(value, str):
+        return value
+        
+    # 使用正则表达式匹配 ${...} 模式
+    pattern = r'\${([A-Za-z0-9_]+)}'
+    
+    def replace_env_var(match):
+        env_var_name = match.group(1)
+        env_var_value = os.environ.get(env_var_name)
+        if env_var_value is None:
+            logger.warning(f"环境变量 {env_var_name} 未定义")
+            return match.group(0)  # 如果未定义则保持原样
+        return env_var_value
+    
+    return re.sub(pattern, replace_env_var, value)
 
 class EmbeddingService:
     """
@@ -26,14 +46,18 @@ class EmbeddingService:
         Args:
             config: 包含配置参数的字典
         """
-        self.config = config
+        self.config = config.copy()  # 创建配置的副本，以便可以修改
+        
+        # 处理config中的环境变量引用
+        if "api_key" in self.config and isinstance(self.config["api_key"], str):
+            self.config["api_key"] = replace_env_vars(self.config["api_key"])
         
         # 获取配置参数
-        self.provider = config.get("provider", "openai").lower()
-        self.model_name = config.get("model_name", "text-embedding-ada-002")
-        self.dimension = config.get("dimension", 1536)  # 默认OpenAI ada-002嵌入维度
-        self.batch_size = config.get("batch_size", 8)
-        self.cache_enabled = config.get("cache_enabled", True)
+        self.provider = self.config.get("provider", "openai").lower()
+        self.model_name = self.config.get("model", self.config.get("model_name", "text-embedding-ada-002"))
+        self.dimension = self.config.get("dimension", self.config.get("dimensions", 1536))  # 默认OpenAI ada-002嵌入维度
+        self.batch_size = self.config.get("batch_size", 8)
+        self.cache_enabled = self.config.get("cache_enabled", True)
         
         # 嵌入缓存
         self._cache = {} if self.cache_enabled else None
@@ -54,7 +78,7 @@ class EmbeddingService:
             if self.provider == "openai":
                 from openai import AsyncOpenAI
                 
-                api_key = self.config.get("api_key")
+                api_key = self.config.get("api_key", os.environ.get("OPENAI_API_KEY", ""))
                 api_base = self.config.get("api_base")
                 
                 if not api_key:
@@ -74,6 +98,36 @@ class EmbeddingService:
                     self.client = SentenceTransformer(model_path)
                 except ImportError:
                     logger.error("使用本地嵌入需要安装sentence-transformers库")
+                    return False
+            
+            elif self.provider == "deepseek":
+                # DeepSeek通常使用OpenAI兼容API
+                from openai import AsyncOpenAI
+                
+                api_key = self.config.get("api_key", os.environ.get("DEEPSEEK_API_KEY", ""))
+                api_base = self.config.get("api_base", "https://api.deepseek.com/v1")
+                
+                if not api_key:
+                    raise ValueError("使用DeepSeek嵌入服务需要API密钥")
+                
+                self.client = AsyncOpenAI(api_key=api_key, base_url=api_base)
+                logger.info(f"初始化DeepSeek嵌入服务，模型: {self.model_name}")
+            
+            elif self.provider == "zhipuai":
+                # 使用ZhipuAI的嵌入服务
+                try:
+                    from zhipuai import ZhipuAI
+                    
+                    api_key = self.config.get("api_key", os.environ.get("ZHIPUAI_API_KEY", ""))
+                    
+                    if not api_key:
+                        raise ValueError("使用智谱AI嵌入服务需要API密钥")
+                    
+                    logger.info("已获取智谱AI API密钥")
+                    self.client = ZhipuAI(api_key=api_key)
+                    logger.info(f"初始化智谱AI嵌入服务，模型: {self.model_name}")
+                except ImportError:
+                    logger.error("使用智谱AI嵌入需要安装zhipuai库，请使用pip install zhipuai安装")
                     return False
             
             else:
@@ -139,6 +193,10 @@ class EmbeddingService:
         try:
             if self.provider == "openai":
                 embeddings = await self._embed_with_openai(texts_to_embed)
+            elif self.provider == "deepseek":
+                embeddings = await self._embed_with_openai(texts_to_embed)  # DeepSeek使用OpenAI兼容API
+            elif self.provider == "zhipuai":
+                embeddings = await self._embed_with_zhipuai(texts_to_embed)
             elif self.provider == "huggingface":
                 # 实现HuggingFace嵌入
                 pass
@@ -211,6 +269,48 @@ class EmbeddingService:
                 
             except Exception as e:
                 logger.error(f"OpenAI嵌入API错误: {str(e)}")
+                # 添加零向量作为回退
+                for _ in range(len(batch)):
+                    all_embeddings.append(np.zeros(self.dimension))
+        
+        return all_embeddings
+    
+    async def _embed_with_zhipuai(self, texts: List[str]) -> List[np.ndarray]:
+        """使用智谱AI嵌入服务嵌入文本"""
+        if not self.client:
+            raise ValueError("智谱AI客户端未初始化")
+        
+        all_embeddings = []
+        # 分批处理以避免API限制
+        for i in range(0, len(texts), self.batch_size):
+            batch = texts[i:i + self.batch_size]
+            
+            try:
+                # 智谱AI嵌入API调用（注意：智谱API可能是同步的，需要在异步函数中处理）
+                import asyncio
+                
+                # 创建嵌入请求参数
+                params = {
+                    "model": self.model_name,  # 例如 "embedding-3"
+                    "input": batch,
+                }
+                
+                # 如果模型支持自定义维度，添加dimensions参数
+                if "embedding-3" in self.model_name:
+                    params["dimensions"] = self.dimension
+                
+                # 使用线程池执行同步API调用
+                loop = asyncio.get_event_loop()
+                response = await loop.run_in_executor(
+                    None, lambda: self.client.embeddings.create(**params)
+                )
+                
+                # 从响应中提取嵌入
+                batch_embeddings = [np.array(item.embedding) for item in response.data]
+                all_embeddings.extend(batch_embeddings)
+                
+            except Exception as e:
+                logger.error(f"智谱AI嵌入API错误: {str(e)}")
                 # 添加零向量作为回退
                 for _ in range(len(batch)):
                     all_embeddings.append(np.zeros(self.dimension))

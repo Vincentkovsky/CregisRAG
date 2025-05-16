@@ -9,6 +9,9 @@ from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 import logging
 
+# 导入环境变量加载工具
+from app.utils.env_loader import load_api_keys, process_config
+
 # 配置日志
 logging.basicConfig(
     level=logging.INFO,
@@ -16,11 +19,20 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# 加载环境变量中的API密钥
+api_keys = load_api_keys()
+if api_keys:
+    logger.info(f"已加载 {len(api_keys)} 个API密钥")
+else:
+    logger.warning("未加载任何API密钥，请确保.env文件配置正确")
+
 # 加载配置
 def load_config():
     config_path = Path("config.yml")
     with open(config_path, "r", encoding="utf-8") as file:
-        return yaml.safe_load(file)
+        config = yaml.safe_load(file)
+        # 处理配置中的环境变量引用
+        return process_config(config)
 
 config = load_config()
 

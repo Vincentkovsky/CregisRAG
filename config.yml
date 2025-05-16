@@ -20,10 +20,10 @@ frontend:
 
 # 嵌入服务配置
 embedding:
-  provider: "openai"
-  model: "text-embedding-3-small"
-  api_key: "${OPENAI_API_KEY}"  # 从环境变量读取
-  dimensions: 1536
+  provider: "zhipuai"
+  model: "embedding-3"
+  api_key: "${ZHIPUAI_API_KEY}"  # 从环境变量读取
+  dimensions: 1536  # 修改为1536，与现有数据库匹配
   batch_size: 10
 
 # 向量存储配置
@@ -32,13 +32,13 @@ vector_store:
   collection_name: "cregisrag"
   persist_directory: "./data/chroma"
   distance_metric: "cosine"
-  embedding_dimension: 1536
+  embedding_dimension: 1536  # 修改为1536，与现有数据库匹配
 
 # LLM服务配置
 llm:
-  provider: "openai"
-  model: "gpt-4o-mini"
-  api_key: "${OPENAI_API_KEY}"  # 从环境变量读取
+  provider: "deepseek"
+  model: "deepseek-chat"
+  api_key: "${DEEPSEEK_API_KEY}"  # 从环境变量读取
   temperature: 0.3
   max_tokens: 1000
 

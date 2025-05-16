@@ -178,17 +178,33 @@ class RAGEngine:
             answer = llm_response.get("text", "")
             logger.debug("LLM生成回答完成")
             
-            # 准备源信息
-            sources = [
-                {
+            # 准备源信息 - 使用文档名称而不是文件名
+            # 创建一个集合用于跟踪已处理的文档名称，避免重复
+            processed_docs = set()
+            sources = []
+            
+            for doc in retrieved_docs:
+                metadata = doc.get("metadata", {})
+                # 优先使用filename作为文档名称，如果不存在则尝试使用file_name或title
+                document_name = metadata.get("filename", 
+                                          metadata.get("file_name", 
+                                                    metadata.get("title", "未知文档")))
+                
+                # 如果这个文档名称已经处理过，跳过添加重复的来源
+                if document_name in processed_docs:
+                    continue
+                
+                # 添加到已处理集合
+                processed_docs.add(document_name)
+                
+                # 准备源信息
+                sources.append({
                     "document_id": doc.get("document_id", ""),
-                    "document_name": doc.get("metadata", {}).get("file_name", "未知文档"),
+                    "document_name": document_name,
                     "text": doc.get("text", ""),
                     "score": doc.get("score", 0),
-                    "metadata": doc.get("metadata", {})
-                }
-                for doc in retrieved_docs
-            ]
+                    "metadata": metadata
+                })
             
             # 记录查询和响应（可选）
             if conversation_id:
