@@ -148,10 +148,12 @@ class RAGEngine:
             if not self.vector_store:
                 raise ValueError("向量存储未初始化")
                 
+            # 使用一个较低的阈值以确保能够检索到相关文档
+            hard_coded_threshold = 0.0  # 暂时硬编码一个极低的阈值
             retrieved_docs = await self.vector_store.similarity_search(
                 query_vector, 
                 top_k=top_k,
-                threshold=self.similarity_threshold,
+                threshold=hard_coded_threshold,  # 使用硬编码阈值
                 filter=filter_metadata
             )
             

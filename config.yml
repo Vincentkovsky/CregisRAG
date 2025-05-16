@@ -45,7 +45,7 @@ llm:
 # 检索配置
 retrieval:
   top_k: 5
-  similarity_threshold: 0.7
+  similarity_threshold: 0.3
   use_reranking: false
 
 # 文本分块器配置
