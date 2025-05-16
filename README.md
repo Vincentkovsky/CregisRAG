@@ -40,26 +40,27 @@ CregisRAG是一个基于检索增强生成(Retrieval-Augmented Generation, RAG)�
 
 - **后端**：Python, FastAPI
 - **向量数据库**：Milvus/Pinecone/Weaviate/Chroma
-- **嵌入模型**：Sentence-Transformers, OpenAI Embeddings
-- **LLM**：OpenAI GPT-4, Claude, Llama 3
+- **嵌入模型**：Sentence-Transformers, OpenAI Embeddings, ZhipuAI Embedding-3
+- **LLM**：OpenAI GPT-4, Claude, Llama 3, Deepseek
 - **前端**：React, TypeScript
 - **部署**：Docker, Kubernetes
 
 ## 实现路线图
 
-### 阶段一：基础架构搭建 (1-2周)
+### 阶段一：基础架构搭建 (1-2周) ✅
 
-- 搭建基本的数据处理管道
-- 实现向量化和检索功能
-- 集成LLM生成能力
-- 开发简单的API接口
+- 搭建基本的数据处理管道 ✅
+- 实现向量化和检索功能 ✅
+- 集成LLM生成能力 ✅
+- 开发简单的API接口 ✅
 
 ### 阶段二：功能增强 (2-3周)
 
-- 实现高级文档解析(支持PDF、HTML等)
+- 实现高级文档解析(支持PDF、HTML等) ✅
+- 开发基础用户界面 ✅
+- 优化Embedding过程，提高文档与查询的语义匹配度
 - 优化检索算法
 - 添加提示模板系统
-- 开发基础用户界面
 
 ### 阶段三：性能优化与扩展 (3-4周)
 
@@ -80,7 +81,7 @@ CregisRAG是一个基于检索增强生成(Retrieval-Augmented Generation, RAG)�
 
 ```bash
 # 克隆仓库
-git clone https://github.com/yourusername/CregisRAG.git
+git clone https://github.com/Vincentkovsky/CregisRAG
 cd CregisRAG
 
 # 安装后端依赖
@@ -89,10 +90,14 @@ pip install -r requirements.txt
 # 安装前端依赖
 cd frontend
 npm install
+
+# 启动前端应用
+npm start
+
 cd ..
 
 # 启动应用
-python run.py
+python3 run.py
 ```
 
 ### 配置说明
