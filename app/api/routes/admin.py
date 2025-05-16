@@ -5,15 +5,41 @@
 import logging
 import os
 import time
+import yaml
+import psutil
+from pathlib import Path
 from typing import Dict, Any, Optional, List
-from fastapi import APIRouter, HTTPException, status, BackgroundTasks
+from fastapi import APIRouter, HTTPException, status, BackgroundTasks, Depends
 from pydantic import BaseModel, Field
+
+# 导入RAG引擎
+from app.core.rag_engine import create_rag_engine
 
 # 使用 APIRouter 而不是直接在 FastAPI 应用上定义路由
 router = APIRouter()
 
 # 配置日志
 logger = logging.getLogger(__name__)
+
+# 加载配置
+def load_config():
+    config_path = Path("config.yml")
+    with open(config_path, "r", encoding="utf-8") as file:
+        return yaml.safe_load(file)
+
+# 初始化RAG引擎
+rag_config = load_config()
+rag_engine = None
+start_time = time.time()  # 记录启动时间
+
+# 依赖项：获取RAG引擎实例
+async def get_rag_engine():
+    global rag_engine
+    if rag_engine is None:
+        logger.info("初始化RAG引擎")
+        rag_engine = create_rag_engine(rag_config)
+        await rag_engine.initialize_services()
+    return rag_engine
 
 # 模型定义
 class SystemStatus(BaseModel):
@@ -44,26 +70,76 @@ class ServiceStatus(BaseModel):
     summary="获取系统状态",
     description="获取RAG系统的整体状态和健康信息"
 )
-async def get_system_status():
+async def get_system_status(
+    rag_engine = Depends(get_rag_engine)
+):
     """获取系统的当前状态"""
     try:
-        # 在实际应用中，应该从各个组件收集真实的状态信息
+        # 收集各个组件的真实状态
         
-        # 模拟系统启动时间
-        start_time = time.time() - 3600  # 假设已运行1小时
+        # 计算运行时间
+        uptime = time.time() - start_time
         
+        # 检查向量存储状态
+        vector_store_status = "up"
+        document_count = 0
+        vector_count = 0
+        
+        try:
+            if rag_engine.vector_store:
+                # 获取文档计数
+                document_count = await rag_engine.vector_store.get_document_count()
+                # 获取向量计数
+                vector_count = await rag_engine.vector_store.get_vector_count()
+        except Exception as e:
+            vector_store_status = "degraded"
+            logger.warning(f"获取向量存储状态时出错: {e}")
+        
+        # 检查LLM服务状态
+        llm_status = "up"
+        try:
+            if rag_engine.llm_service:
+                # 可以添加LLM服务的健康检查
+                pass
+        except Exception as e:
+            llm_status = "degraded"
+            logger.warning(f"获取LLM服务状态时出错: {e}")
+        
+        # 检查嵌入服务状态
+        embedding_status = "up"
+        try:
+            if rag_engine.embedding_service:
+                # 可以添加嵌入服务的健康检查
+                pass
+        except Exception as e:
+            embedding_status = "degraded"
+            logger.warning(f"获取嵌入服务状态时出错: {e}")
+        
+        # 确定整体系统状态
+        overall_status = "healthy"
+        if vector_store_status != "up" or llm_status != "up" or embedding_status != "up":
+            overall_status = "degraded"
+        
+        # 获取系统资源使用情况
+        cpu_usage = psutil.cpu_percent()
+        memory = psutil.virtual_memory()
+        memory_usage = memory.percent
+        disk = psutil.disk_usage('/')
+        disk_usage = disk.percent
+        
+        # 构建响应
         return SystemStatus(
-            status="healthy",
+            status=overall_status,
             version="0.1.0",
-            uptime=time.time() - start_time,
-            document_count=25,
-            vector_count=1250,
+            uptime=uptime,
+            document_count=document_count,
+            vector_count=vector_count,
             resources={
-                "cpu_usage": 15.2,
-                "memory_usage": 28.5,
-                "disk_usage": 42.3,
-                "embedding_queue": 0,
-                "processing_queue": 0
+                "cpu_usage": cpu_usage,
+                "memory_usage": memory_usage,
+                "disk_usage": disk_usage,
+                "embedding_queue": 0,  # 可以从实际队列中获取
+                "processing_queue": 0   # 可以从实际队列中获取
             }
         )
     except Exception as e:
@@ -81,7 +157,8 @@ async def get_system_status():
 )
 async def perform_maintenance(
     background_tasks: BackgroundTasks,
-    request: MaintenanceRequest
+    request: MaintenanceRequest,
+    rag_engine = Depends(get_rag_engine)
 ):
     """
     执行系统维护操作
@@ -102,17 +179,22 @@ async def perform_maintenance(
                 detail=f"无效的维护操作。允许的操作: {', '.join(valid_actions)}"
             )
         
+        # 获取任务ID
+        job_id = f"job-{int(time.time())}"
+        
         # 在后台任务中执行维护
         background_tasks.add_task(
-            execute_maintenance, 
+            execute_maintenance_task, 
+            rag_engine=rag_engine,
             action=action,
-            options=options
+            options=options,
+            job_id=job_id
         )
         
         return {
             "status": "accepted",
             "message": f"开始执行维护操作: {action}",
-            "job_id": f"job-{int(time.time())}"
+            "job_id": job_id
         }
     except HTTPException:
         raise
@@ -130,53 +212,122 @@ async def perform_maintenance(
     summary="获取服务状态",
     description="获取各个组件和服务的健康状态"
 )
-async def get_services_status():
+async def get_services_status(
+    rag_engine = Depends(get_rag_engine)
+):
     """获取各个服务的健康状态"""
     try:
-        # 在实际应用中，应该检查各个服务的真实状态
+        services = []
         
-        # 示例服务状态
-        services = [
-            ServiceStatus(
-                name="vector_db",
-                status="up",
-                latency=15.2,
-                details={
-                    "provider": "chroma",
-                    "collections": 1,
-                    "connection_pool": 5
+        # 检查向量存储状态
+        vector_db_status = "up"
+        vector_db_latency = 0
+        vector_db_details = {}
+        
+        try:
+            if rag_engine.vector_store:
+                # 测量向量存储延迟
+                start = time.time()
+                await rag_engine.vector_store.get_document_count()
+                vector_db_latency = (time.time() - start) * 1000  # 转换为毫秒
+                
+                # 获取向量存储详情
+                vector_db_details = {
+                    "provider": rag_engine.vector_store.__class__.__name__,
+                    "collections": 1,  # 可以从向量存储中获取实际值
+                    "document_count": await rag_engine.vector_store.get_document_count()
                 }
-            ),
-            ServiceStatus(
-                name="llm_service",
-                status="up",
-                latency=485.7,
-                details={
-                    "provider": "openai",
-                    "model": "gpt-4-turbo",
-                    "requests_per_minute": 12.5
+        except Exception as e:
+            vector_db_status = "down"
+            logger.warning(f"检查向量存储状态时出错: {e}")
+        
+        services.append(ServiceStatus(
+            name="vector_db",
+            status=vector_db_status,
+            latency=vector_db_latency,
+            details=vector_db_details
+        ))
+        
+        # 检查LLM服务状态
+        llm_status = "up"
+        llm_latency = 0
+        llm_details = {}
+        
+        try:
+            if rag_engine.llm_service:
+                # 测量LLM服务延迟
+                # 注意：这里只是简单调用，可能需要更复杂的健康检查
+                start = time.time()
+                await rag_engine.llm_service.generate(
+                    prompt="Hello, this is a test.",
+                    system_message="You are a helpful assistant."
+                )
+                llm_latency = (time.time() - start) * 1000  # 转换为毫秒
+                
+                # 获取LLM服务详情
+                llm_details = {
+                    "provider": rag_engine.llm_service.__class__.__name__,
+                    "model": rag_engine.llm_service.model_name if hasattr(rag_engine.llm_service, 'model_name') else "unknown"
                 }
-            ),
-            ServiceStatus(
-                name="embedding_service",
-                status="up",
-                latency=28.3,
-                details={
-                    "model": "sentence-transformers/all-MiniLM-L6-v2",
-                    "queue_size": 0,
-                    "processed_last_hour": 150
+        except Exception as e:
+            llm_status = "down"
+            logger.warning(f"检查LLM服务状态时出错: {e}")
+        
+        services.append(ServiceStatus(
+            name="llm_service",
+            status=llm_status,
+            latency=llm_latency,
+            details=llm_details
+        ))
+        
+        # 检查嵌入服务状态
+        embedding_status = "up"
+        embedding_latency = 0
+        embedding_details = {}
+        
+        try:
+            if rag_engine.embedding_service:
+                # 测量嵌入服务延迟
+                start = time.time()
+                await rag_engine.embedding_service.embed_query("This is a test query.")
+                embedding_latency = (time.time() - start) * 1000  # 转换为毫秒
+                
+                # 获取嵌入服务详情
+                embedding_details = {
+                    "model": rag_engine.embedding_service.model_name if hasattr(rag_engine.embedding_service, 'model_name') else "unknown",
+                    "dimension": rag_engine.embedding_service.dimension if hasattr(rag_engine.embedding_service, 'dimension') else 0
                 }
-            ),
-            ServiceStatus(
-                name="document_processor",
-                status="up",
-                latency=210.5,
-                details={
-                    "queue_size": 0,
-                    "processed_last_hour": 5
-                }
-            )
-        ]
+        except Exception as e:
+            embedding_status = "down"
+            logger.warning(f"检查嵌入服务状态时出错: {e}")
+        
+        services.append(ServiceStatus(
+            name="embedding_service",
+            status=embedding_status,
+            latency=embedding_latency,
+            details=embedding_details
+        ))
+        
+        # 检查文档处理服务状态
+        doc_processor_status = "up"
+        
+        try:
+            if rag_engine.ingest_service:
+                # 可以添加文档处理服务的健康检查
+                pass
+        except Exception as e:
+            doc_processor_status = "down"
+            logger.warning(f"检查文档处理服务状态时出错: {e}")
+        
+        services.append(ServiceStatus(
+            name="document_processor",
+            status=doc_processor_status,
+            latency=0,  # 文档处理通常是异步的，没有直接的延迟测量
+            details={
+                "queue_size": 0,  # 可以从实际队列中获取
+                "processed_last_hour": 0  # 可以从实际统计中获取
+            }
+        ))
         
         return services
     except Exception as e:
@@ -192,24 +343,40 @@ async def get_services_status():
     summary="清除知识库",
     description="清除知识库中的所有文档和向量"
 )
-async def clear_knowledge_base():
+async def clear_knowledge_base(
+    rag_engine = Depends(get_rag_engine)
+):
     """清除知识库中的所有文档和向量"""
     try:
-        # 在实际应用中，这应该:
-        # 1. 从向量存储中删除所有向量
-        # 2. 删除所有文件存储中的文档
-        # 3. 清除元数据数据库
+        if not rag_engine.vector_store:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="向量存储不可用"
+            )
+            
+        # 清除向量存储
+        await rag_engine.vector_store.clear()
         
-        # 危险操作，应该有额外的确认机制
-        
+        # 清除原始文件
+        try:
+            raw_dir = Path("data/raw")
+            if raw_dir.exists():
+                for file in raw_dir.glob("*"):
+                    if file.is_file():
+                        os.remove(file)
+            
+            # 清除状态文件
+            status_dir = Path("data/status")
+            if status_dir.exists():
+                for file in status_dir.glob("*"):
+                    if file.is_file():
+                        os.remove(file)
+        except Exception as e:
+            logger.warning(f"清除文件时出错: {e}")
+            
         return {
             "status": "success",
-            "message": "知识库已成功清除",
-            "details": {
-                "documents_removed": 25,
-                "vectors_removed": 1250,
-                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
-            }
+            "message": "知识库已清除"
         }
     except Exception as e:
         logger.error(f"清除知识库时出错: {e}", exc_info=True)
@@ -218,40 +385,62 @@ async def clear_knowledge_base():
             detail=f"清除知识库失败: {str(e)}"
         )
 
-# 系统使用统计端点
+# 获取系统统计信息
 @router.get(
     "/admin/statistics", 
     summary="获取系统统计信息",
     description="获取系统使用和性能统计信息"
 )
-async def get_statistics():
+async def get_statistics(
+    rag_engine = Depends(get_rag_engine)
+):
     """获取系统使用和性能统计信息"""
     try:
-        # 在实际应用中，应该从数据库或日志中收集真实的统计数据
+        # 在实际应用中，应该从数据库或日志中收集统计信息
+        
+        # 收集向量存储统计信息
+        vector_stats = {}
+        if rag_engine.vector_store:
+            try:
+                vector_stats = {
+                    "document_count": await rag_engine.vector_store.get_document_count(),
+                    "vector_count": await rag_engine.vector_store.get_vector_count(),
+                    "collection_size": 0  # 可以从向量存储中获取
+                }
+            except:
+                pass
+                
+        # 收集查询统计信息
+        # 在实际应用中，应该从数据库中查询
+        query_stats = {
+            "total_queries": 0,
+            "queries_last_24h": 0,
+            "avg_query_time": 0,
+            "avg_tokens_per_query": 0
+        }
+        
+        # 收集文档统计信息
+        # 在实际应用中，应该从数据库中查询
+        doc_stats = {
+            "total_documents": vector_stats.get("document_count", 0),
+            "documents_by_type": {},
+            "avg_chunks_per_document": 0
+        }
+        
+        # 收集系统性能统计信息
+        perf_stats = {
+            "cpu_usage": psutil.cpu_percent(),
+            "memory_usage": psutil.virtual_memory().percent,
+            "disk_usage": psutil.disk_usage('/').percent,
+            "avg_response_time": 0
+        }
         
         return {
-            "query_statistics": {
-                "total_queries": 1250,
-                "average_latency_ms": 350,
-                "queries_last_24h": 85,
-                "top_queries": [
-                    {"query": "如何配置向量数据库", "count": 15},
-                    {"query": "RAG系统架构", "count": 12},
-                    {"query": "文本分块最佳实践", "count": 8}
-                ]
-            },
-            "ingest_statistics": {
-                "total_documents": 25,
-                "total_vectors": 1250,
-                "average_chunks_per_doc": 50,
-                "ingested_last_24h": 3
-            },
-            "system_statistics": {
-                "uptime_hours": 72,
-                "average_cpu_usage": 18.5,
-                "average_memory_usage": 32.0,
-                "total_api_calls": 2500
-            }
+            "vector_store": vector_stats,
+            "queries": query_stats,
+            "documents": doc_stats,
+            "performance": perf_stats,
+            "timestamp": time.time()
         }
     except Exception as e:
         logger.error(f"获取统计信息时出错: {e}", exc_info=True)
@@ -260,22 +449,162 @@ async def get_statistics():
             detail=f"获取统计信息失败: {str(e)}"
         )
 
-# ---- 辅助函数 ----
-
-def execute_maintenance(action: str, options: Dict[str, Any]):
-    """
-    后台任务：执行系统维护操作
-    """
+# 辅助函数：执行维护任务
+async def execute_maintenance_task(rag_engine, action: str, options: Dict[str, Any], job_id: str):
+    """在后台执行维护任务"""
+    logger.info(f"开始执行维护任务: {action}, 任务ID: {job_id}")
+    
     try:
-        logger.info(f"开始执行维护操作: {action}, 选项: {options}")
+        # 创建状态文件
+        os.makedirs("data/jobs", exist_ok=True)
+        status_file = f"data/jobs/{job_id}.json"
         
-        # TODO: 实现实际的维护逻辑
-        # 根据action类型执行不同的维护操作
+        # 更新初始状态
+        update_job_status(job_id, "running", 0, None)
         
-        # 模拟处理延迟
-        time.sleep(5)
+        if action == "reindex":
+            # 重建索引
+            if not rag_engine.vector_store:
+                raise ValueError("向量存储不可用")
+                
+            # 获取所有文档
+            docs = await rag_engine.vector_store.get_all_documents()
+            total_docs = len(docs)
+            
+            # 清除现有索引
+            await rag_engine.vector_store.clear()
+            update_job_status(job_id, "running", 30, None)
+            
+            # 重新索引
+            for i, doc in enumerate(docs):
+                # 重新嵌入和存储文档
+                text = doc.get("text", "")
+                metadata = doc.get("metadata", {})
+                
+                if text:
+                    embedding = await rag_engine.embedding_service.embed_text(text)
+                    await rag_engine.vector_store.add_vectors([embedding], [text], [metadata])
+                
+                # 更新进度
+                progress = 30 + int(70 * (i + 1) / total_docs)
+                update_job_status(job_id, "running", progress, None)
+                
+        elif action == "optimize":
+            # 优化向量存储
+            if not rag_engine.vector_store:
+                raise ValueError("向量存储不可用")
+                
+            # 如果向量存储支持优化操作
+            if hasattr(rag_engine.vector_store, "optimize") and callable(getattr(rag_engine.vector_store, "optimize")):
+                await rag_engine.vector_store.optimize()
+                
+            update_job_status(job_id, "running", 100, None)
+                
+        elif action == "backup":
+            # 创建备份
+            backup_dir = options.get("backup_dir", "data/backups")
+            os.makedirs(backup_dir, exist_ok=True)
+            
+            backup_name = f"backup_{time.strftime('%Y%m%d_%H%M%S')}"
+            backup_path = os.path.join(backup_dir, backup_name)
+            os.makedirs(backup_path, exist_ok=True)
+            
+            # 备份原始文件
+            update_job_status(job_id, "running", 20, None)
+            
+            raw_dir = Path("data/raw")
+            if raw_dir.exists():
+                os.makedirs(os.path.join(backup_path, "raw"), exist_ok=True)
+                for file in raw_dir.glob("*"):
+                    if file.is_file():
+                        import shutil
+                        shutil.copy2(file, os.path.join(backup_path, "raw", file.name))
+            
+            # 备份状态文件
+            update_job_status(job_id, "running", 40, None)
+            
+            status_dir = Path("data/status")
+            if status_dir.exists():
+                os.makedirs(os.path.join(backup_path, "status"), exist_ok=True)
+                for file in status_dir.glob("*"):
+                    if file.is_file():
+                        import shutil
+                        shutil.copy2(file, os.path.join(backup_path, "status", file.name))
+            
+            # 备份向量存储 (如果支持)
+            update_job_status(job_id, "running", 60, None)
+            
+            if hasattr(rag_engine.vector_store, "backup") and callable(getattr(rag_engine.vector_store, "backup")):
+                await rag_engine.vector_store.backup(os.path.join(backup_path, "vectors"))
+            
+            update_job_status(job_id, "running", 100, None)
+            
+        elif action == "restore":
+            # 从备份恢复
+            backup_path = options.get("backup_path")
+            if not backup_path or not os.path.exists(backup_path):
+                raise ValueError(f"无效的备份路径: {backup_path}")
+            
+            # 恢复向量存储 (如果支持)
+            update_job_status(job_id, "running", 30, None)
+            
+            if hasattr(rag_engine.vector_store, "restore") and callable(getattr(rag_engine.vector_store, "restore")):
+                vector_backup = os.path.join(backup_path, "vectors")
+                if os.path.exists(vector_backup):
+                    await rag_engine.vector_store.restore(vector_backup)
+            
+            # 恢复原始文件
+            update_job_status(job_id, "running", 60, None)
+            
+            raw_backup = os.path.join(backup_path, "raw")
+            if os.path.exists(raw_backup):
+                os.makedirs("data/raw", exist_ok=True)
+                for file in os.listdir(raw_backup):
+                    import shutil
+                    src = os.path.join(raw_backup, file)
+                    if os.path.isfile(src):
+                        shutil.copy2(src, os.path.join("data/raw", file))
+            
+            # 恢复状态文件
+            update_job_status(job_id, "running", 90, None)
+            
+            status_backup = os.path.join(backup_path, "status")
+            if os.path.exists(status_backup):
+                os.makedirs("data/status", exist_ok=True)
+                for file in os.listdir(status_backup):
+                    import shutil
+                    src = os.path.join(status_backup, file)
+                    if os.path.isfile(src):
+                        shutil.copy2(src, os.path.join("data/status", file))
+            
+            update_job_status(job_id, "running", 100, None)
+            
+        # 完成任务
+        update_job_status(job_id, "completed", 100, None)
+        logger.info(f"维护任务完成: {action}, 任务ID: {job_id}")
         
-        logger.info(f"维护操作完成: {action}")
     except Exception as e:
-        logger.error(f"执行维护操作 {action} 时出错: {e}", exc_info=True)
-        # 在实际应用中，应该更新操作状态 
+        logger.error(f"执行维护任务时出错: {action}, 任务ID: {job_id}, 错误: {e}", exc_info=True)
+        update_job_status(job_id, "failed", 0, str(e))
+
+# 辅助函数：更新任务状态
+def update_job_status(job_id: str, status: str, progress: float, error: Optional[str]):
+    """更新任务状态文件"""
+    try:
+        import json
+        
+        status_file = f"data/jobs/{job_id}.json"
+        status_data = {
+            "job_id": job_id,
+            "status": status,
+            "progress": progress,
+            "error": error,
+            "created_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "updated_at": time.strftime("%Y-%m-%d %H:%M:%S")
+        }
+        
+        with open(status_file, "w", encoding="utf-8") as f:
+            json.dump(status_data, f, ensure_ascii=False, indent=2)
+            
+    except Exception as e:
+        logger.error(f"更新任务状态文件时出错: {job_id} - {str(e)}") 

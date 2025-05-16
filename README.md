@@ -124,5 +124,5 @@ CregisRAG适用于多种场景，包括但不限于：
 
 ## 联系方式
 
-- 项目维护者：[您的名字](mailto:your.email@example.com)
-- 项目仓库：[GitHub](https://github.com/yourusername/CregisRAG) 
+- 项目维护者：[Vincentkovsky](vincent.jin6@icloud.com)
+- 项目仓库：[GitHub](https://github.com/Vincentkovsky/CregisRAG) 

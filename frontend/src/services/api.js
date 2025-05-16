@@ -45,15 +45,28 @@ export const queryAPI = {
 // 文档摄取API
 export const ingestAPI = {
   // 上传文件
-  uploadDocument: (file, metadata = {}) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('metadata', JSON.stringify(metadata));
+  uploadDocument: (file, onProgress, metadata = {}) => {
+    // 检查参数类型 - 如果第二个参数是对象，则没有传入回调函数
+    if (typeof onProgress === 'object' && !(onProgress instanceof Function)) {
+      metadata = onProgress;
+      onProgress = null;
+    }
+
+    // 如果file是FormData对象，直接使用
+    let formData;
+    if (file instanceof FormData) {
+      formData = file;
+    } else {
+      formData = new FormData();
+      formData.append('file', file);
+      formData.append('metadata', JSON.stringify(metadata));
+    }
 
     return api.post('/ingest/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+      onUploadProgress: onProgress || undefined
     });
   },
 
@@ -76,6 +89,23 @@ export const ingestAPI = {
   deleteDocument: (documentId) => {
     return api.delete(`/ingest/documents/${documentId}`);
   },
+  
+  // 下载文档
+  downloadDocument: (documentId) => {
+    return api.get(`/ingest/documents/${documentId}/download`, {
+      responseType: 'blob'
+    }).then(response => {
+      // 创建blob链接并点击下载
+      const url = window.URL.createObjectURL(new Blob([response]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `document-${documentId}.pdf`); // 使用适当的文件名和扩展名
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return true;
+    });
+  }
 };
 
 // 管理API

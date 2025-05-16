@@ -7,12 +7,27 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 import time
+import yaml
+from pathlib import Path
+
+# 导入RAG引擎
+from app.core.rag_engine import create_rag_engine
 
 # 使用 APIRouter 而不是直接在 FastAPI 应用上定义路由
 router = APIRouter()
 
 # 配置日志
 logger = logging.getLogger(__name__)
+
+# 加载配置
+def load_config():
+    config_path = Path("config.yml")
+    with open(config_path, "r", encoding="utf-8") as file:
+        return yaml.safe_load(file)
+
+# 初始化RAG引擎
+rag_config = load_config()
+rag_engine = None
 
 # 请求模型
 class QueryRequest(BaseModel):
@@ -36,9 +51,21 @@ class QueryResponse(BaseModel):
     sources: List[Source] = Field(..., description="用于生成回答的源")
     processing_time: float = Field(..., description="处理时间（秒）")
 
+# 依赖项：获取RAG引擎实例
+async def get_rag_engine():
+    global rag_engine
+    if rag_engine is None:
+        logger.info("初始化RAG引擎")
+        rag_engine = create_rag_engine(rag_config)
+        await rag_engine.initialize_services()
+    return rag_engine
+
 # 查询端点
 @router.post("/query", response_model=QueryResponse, summary="查询知识库")
-async def query_knowledge_base(request: QueryRequest):
+async def query_knowledge_base(
+    request: QueryRequest, 
+    rag_engine = Depends(get_rag_engine)
+):
     """
     根据用户查询，从知识库中检索相关信息并生成回答
     """
@@ -47,32 +74,26 @@ async def query_knowledge_base(request: QueryRequest):
     try:
         logger.info(f"接收到查询: {request.query}")
         
-        # TODO: 实现实际的RAG逻辑
-        # 1. 向量化查询
-        # 2. 检索相关文档
-        # 3. 重新排序（可选）
-        # 4. 构建提示
-        # 5. 调用LLM生成回答
+        # 使用RAG引擎处理查询
+        rag_response = await rag_engine.process_query(
+            query=request.query,
+            top_k=request.top_k,
+            filter_metadata=request.filter,
+            conversation_id=request.user_id
+        )
         
-        # 示例响应（生产环境中应由实际RAG系统替换）
+        # 处理响应
+        answer = rag_response.get("answer", "")
         sources = [
             Source(
-                document_id="doc123",
-                document_name="示例文档.pdf",
-                text="这是从知识库中检索的相关上下文。在实际应用中，这将是与查询相关的真实文本。",
-                score=0.92,
-                metadata={"source_type": "pdf", "page": 5, "created_at": "2024-01-15T12:30:00Z"}
-            ),
-            Source(
-                document_id="doc456",
-                document_name="另一个示例.txt",
-                text="这是另一段相关上下文。实际RAG系统会检索多个相关文本段落并按相关性排序。",
-                score=0.85,
-                metadata={"source_type": "text", "created_at": "2024-02-20T09:15:00Z"}
+                document_id=src.get("document_id", ""),
+                document_name=src.get("document_name", "未知文档"),
+                text=src.get("text", ""),
+                score=src.get("score", 0.0),
+                metadata=src.get("metadata", {})
             )
+            for src in rag_response.get("sources", [])
         ]
-        
-        answer = f"这是对查询 '{request.query}' 的示例回答。在实际RAG系统中，这将由LLM基于检索到的上下文生成。回答将引用检索到的信息源，并提供准确的信息。"
         
         processing_time = time.time() - start_time
         
@@ -120,20 +141,47 @@ async def stream_query(request: QueryRequest):
 
 # 相似问题建议端点
 @router.post("/query/suggest", summary="获取相似问题建议")
-async def suggest_questions(query: str):
+async def suggest_questions(
+    query: str,
+    rag_engine = Depends(get_rag_engine)
+):
     """
     根据用户输入的问题，提供相似问题的建议
     
     当用户开始输入查询时，此端点可用于提供自动补全和建议
     """
-    # 在此实现相似问题推荐逻辑
-    # 可以使用向量化存储的历史问题进行相似度搜索
-    
-    # 示例响应
-    suggestions = [
-        f"{query} 的最佳实践是什么？",
-        f"如何优化 {query} 的性能？",
-        f"{query} 的常见问题有哪些？"
-    ]
-    
-    return {"suggestions": suggestions} 
+    # 尝试使用向量存储来查找相似问题
+    try:
+        # 向量化查询
+        query_vector = await rag_engine.embedding_service.embed_query(query)
+        
+        # 在向量存储中查找相似问题
+        # 假设我们有一个专门存放历史问题的集合
+        similar_questions = await rag_engine.vector_store.similarity_search(
+            query_vector, 
+            top_k=3,
+            collection_name="questions"  # 可选参数，如果向量存储支持多个集合
+        )
+        
+        suggestions = [q.get("text", "") for q in similar_questions]
+        
+        # 如果没有足够的相似问题，生成一些基于模板的建议
+        if len(suggestions) < 3:
+            default_suggestions = [
+                f"{query} 的最佳实践是什么？",
+                f"如何优化 {query} 的性能？",
+                f"{query} 的常见问题有哪些？"
+            ]
+            suggestions.extend(default_suggestions[:3 - len(suggestions)])
+        
+        return {"suggestions": suggestions}
+        
+    except Exception as e:
+        logger.warning(f"获取问题建议时出错: {e}")
+        # 出错时返回默认建议
+        suggestions = [
+            f"{query} 的最佳实践是什么？",
+            f"如何优化 {query} 的性能？",
+            f"{query} 的常见问题有哪些？"
+        ]
+        return {"suggestions": suggestions} 

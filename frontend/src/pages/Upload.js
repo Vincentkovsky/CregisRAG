@@ -155,26 +155,49 @@ function Upload({ showNotification }) {
         // 上传文件
         const formData = new FormData();
         formData.append('file', fileObj.file);
-        formData.append('chunker', config.chunker);
-        formData.append('chunk_size', config.chunkSize);
-        formData.append('chunk_overlap', config.chunkOverlap);
-        formData.append('extract_metadata', config.metadataExtraction);
-        formData.append('detect_language', config.languageDetection);
-        formData.append('extract_images', config.extractImages);
+        
+        // 添加配置选项为metadata
+        const configMetadata = {
+          chunker: config.chunker,
+          chunk_size: config.chunkSize,
+          chunk_overlap: config.chunkOverlap,
+          extract_metadata: config.metadataExtraction,
+          detect_language: config.languageDetection,
+          extract_images: config.extractImages
+        };
         
         if (config.indexName) {
-          formData.append('index_name', config.indexName);
+          configMetadata.index_name = config.indexName;
         }
+        
+        // 添加元数据
+        formData.append('metadata', JSON.stringify(configMetadata));
 
-        const response = await ingestAPI.uploadDocument(formData, (progressEvent) => {
-          const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
-          setUploadProgress(progress);
-          
-          // 更新文件进度
-          const progressFiles = [...files];
-          progressFiles[i] = { ...progressFiles[i], progress };
-          setFiles(progressFiles);
-        });
+        const response = await ingestAPI.uploadDocument(
+          formData, 
+          (progressEvent) => {
+            const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+            setUploadProgress(progress);
+            
+            // 更新文件进度
+            const progressFiles = [...files];
+            progressFiles[i] = { ...progressFiles[i], progress };
+            setFiles(progressFiles);
+          }
+        );
+
+        // 检查上传响应是否包含错误
+        if (response.error) {
+          const errorFiles = [...files];
+          errorFiles[i] = { 
+            ...errorFiles[i], 
+            status: UPLOAD_STATUS.ERROR, 
+            error: response.error || '上传失败',
+          };
+          setFiles(errorFiles);
+          errorCount++;
+          continue;
+        }
 
         // 上传成功后进入处理阶段
         const processingFiles = [...files];
@@ -194,28 +217,52 @@ function Upload({ showNotification }) {
 
         while (!isProcessed && retryCount < maxRetries) {
           await new Promise(resolve => setTimeout(resolve, 2000)); // 每2秒检查一次
-          const status = await ingestAPI.getIngestStatus(response.document_id);
           
-          if (status.status === 'completed') {
-            isProcessed = true;
-            const successFiles = [...files];
-            successFiles[i] = { 
-              ...successFiles[i], 
-              status: UPLOAD_STATUS.SUCCESS,
-              metadata: status.metadata,
-            };
-            setFiles(successFiles);
-            successCount++;
-          } else if (status.status === 'error') {
-            isProcessed = true;
-            const errorFiles = [...files];
-            errorFiles[i] = { 
-              ...errorFiles[i], 
-              status: UPLOAD_STATUS.ERROR, 
-              error: status.error || '处理失败',
-            };
-            setFiles(errorFiles);
-            errorCount++;
+          try {
+            const status = await ingestAPI.getIngestStatus(response.document_id);
+            
+            // 检查是否有错误
+            if (status.error) {
+              isProcessed = true;
+              const errorFiles = [...files];
+              errorFiles[i] = { 
+                ...errorFiles[i], 
+                status: UPLOAD_STATUS.ERROR, 
+                error: status.error || '处理失败',
+              };
+              setFiles(errorFiles);
+              errorCount++;
+              break;
+            }
+            
+            // 更新处理进度
+            const statusFiles = [...files];
+            const fileIndex = statusFiles.findIndex(f => f.id === fileObj.id);
+            if (fileIndex !== -1) {
+              statusFiles[fileIndex] = { 
+                ...statusFiles[fileIndex], 
+                progress: status.progress,
+                status: status.status === 'completed' 
+                  ? UPLOAD_STATUS.SUCCESS 
+                  : status.status === 'failed' 
+                    ? UPLOAD_STATUS.ERROR 
+                    : UPLOAD_STATUS.PROCESSING,
+                error: status.error,
+                metadata: status.metadata
+              };
+              setFiles(statusFiles);
+            }
+            
+            if (status.status === 'completed') {
+              isProcessed = true;
+              successCount++;
+            } else if (status.status === 'failed') {
+              isProcessed = true;
+              errorCount++;
+            }
+          } catch (error) {
+            console.error(`获取文档状态失败: ${error.message}`);
+            // 继续重试，不终止循环
           }
           
           retryCount++;
