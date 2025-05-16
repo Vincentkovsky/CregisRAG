@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+# Virtual Environment
+venv/
+ENV/
+.env
+# Data and models
+data/raw/
+data/processed/
+data/embeddings/
+data/chroma/
+# Frontend
+frontend/node_modules/
+frontend/build/
+# OS specific
+.DS_Store
+Thumbs.db
