@@ -15,50 +15,140 @@ app:
 
 # 前端配置
 frontend:
-  title: "CregisRAG - 智能检索增强生成系统"
-  description: "企业级知识库智能问答系统"
+  title: "Cregis RAG 系统"
+  description: "检索增强生成系统"
+  logo_path: "/static/logo.png"
+  theme: "light"
+  language: "zh-CN"
 
 # 嵌入服务配置
 embedding:
   provider: "zhipuai"
   model: "embedding-3"
-  api_key: "${ZHIPUAI_API_KEY}"  # 从环境变量读取
-  dimensions: 1536  # 修改为1536，与现有数据库匹配
+  api_key: "${ZHIPUAI_API_KEY}"
+  dimension: 1536
   batch_size: 10
+  cache_enabled: true
+  normalize_embeddings: true
+  
+  # 文本预处理配置
+  text_processor:
+    # 常规清洗选项
+    remove_urls: true
+    remove_html: true
+    normalize_whitespace: true
+    lowercase: true
+    remove_punctuation: false
+    # 分词选项
+    segmentation_enabled: true
+    remove_stopwords: true
+    stopwords_file: "data/stopwords/chinese_stopwords.txt"
+    # 查询扩展
+    query_expansion_enabled: true
+    query_rewrite_count: 2
 
-# 向量存储配置
-vector_store:
-  provider: "chroma"
-  collection_name: "cregisrag"
-  persist_directory: "./data/chroma"
-  distance_metric: "cosine"
-  embedding_dimension: 1536  # 修改为1536，与现有数据库匹配
+# 存储配置
+storage:
+  # 向量存储配置
+  vector_store:
+    provider: "chroma"
+    collection_name: "documents"
+    persist_directory: "data/chroma"
+    embedding_dimension: 1536
+  
+  # 文本索引配置（可选）
+  use_text_index: false
+  normalize_embeddings: true
 
 # LLM服务配置
 llm:
-  provider: "deepseek"
-  model: "deepseek-chat"
-  api_key: "${DEEPSEEK_API_KEY}"  # 从环境变量读取
+  provider: "zhipuai"
+  model: "glm-4"
+  api_key: "${ZHIPUAI_API_KEY}"
   temperature: 0.3
-  max_tokens: 1000
+  max_tokens: 2000
+  top_p: 0.9
+  stop: ["<END>"]
 
-# 检索配置
-retrieval:
+# RAG引擎配置
+rag:
+  # 检索配置
+  similarity_threshold: 0.2
   top_k: 5
-  similarity_threshold: 0.3
-  use_reranking: false
+  enable_hybrid_search: true
+  hybrid_search_weight: 0.3
+  enable_reranking: true
+  
+  # MMR配置（多样性检索）
+  use_mmr: true
+  mmr_lambda: 0.5
+  
+  # 自动检测语言
+  auto_detect_language: true
+  
+  # 上下文长度限制
+  max_document_length: 8000
+  
+  # 提示模板
+  prompt_template: |
+    你是Cregis的AI助手，请根据以下参考文档回答问题。
+    如果参考文档中没有包含问题的答案，请说明你无法回答这个问题。
+    请不要编造任何不在参考文档中的信息。
+    尽可能详细地回答问题，但保持简洁清晰。
+    
+    参考文档:
+    {{documents}}
+    
+    问题: {{query}}
+    
+    回答:
 
-# 文本分块器配置
-chunker:
-  method: "recursive"
-  chunk_size: 1000
-  chunk_overlap: 200
-  separators: ["\n\n", "\n", ". ", ", ", " "]
-
-# 文档处理器配置
+# 文档处理配置
 document_processor:
-  extract_metadata: true
-  supported_formats: ["pdf", "txt", "doc", "docx", "md", "html"]
+  # 文本提取配置
+  text_extraction:
+    pdf_extraction_method: "pdfminer"
+    ocr_enabled: false
+    image_text_extraction: false
+  
+  # 文档元数据提取
+  metadata_extraction:
+    extract_title: true
+    extract_author: true
+    extract_date: true
+    extract_custom_fields: false
+
+# 文本分块配置
+chunker:
+  chunk_size: 500
+  chunk_overlap: 100
+  split_method: "paragraph"
+  min_chunk_size: 50
+
+# 文件存储配置
+file_storage:
+  storage_type: "local"
+  local_path: "data/documents"
+  max_file_size_mb: 20
+  allowed_file_types:
+    - "pdf"
+    - "docx"
+    - "txt"
+    - "md"
+
+# 安全配置
+security:
+  enable_authentication: false
+  enable_rate_limiting: true
+  rate_limit:
+    max_requests: 50
+    window_seconds: 60
+
+# 系统配置
+system:
+  log_level: "INFO"
+  log_file: "logs/app.log"
+  max_concurrent_tasks: 5
 
 # 摄入服务配置
 ingest:

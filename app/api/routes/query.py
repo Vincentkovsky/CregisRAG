@@ -13,6 +13,9 @@ from pathlib import Path
 # 导入RAG引擎
 from app.core.rag_engine import create_rag_engine
 
+# 导入日志处理工具
+from app.utils.log_handler import record_query, record_error
+
 # 使用 APIRouter 而不是直接在 FastAPI 应用上定义路由
 router = APIRouter()
 
@@ -97,6 +100,27 @@ async def query_knowledge_base(
         
         processing_time = time.time() - start_time
         
+        # 转换为原生字典以便于记录
+        source_dicts = [
+            {
+                "document_id": src.document_id,
+                "document_name": src.document_name,
+                "text": src.text,
+                "score": src.score,
+                "metadata": src.metadata
+            }
+            for src in sources
+        ]
+        
+        # 记录查询
+        record_query(
+            query=request.query,
+            answer=answer,
+            sources=source_dicts,
+            processing_time=processing_time,
+            token_usage=rag_response.get("token_usage", {})
+        )
+        
         return QueryResponse(
             query=request.query,
             answer=answer,
@@ -105,7 +129,22 @@ async def query_knowledge_base(
         )
         
     except Exception as e:
+        processing_time = time.time() - start_time
         logger.error(f"处理查询时出错: {e}", exc_info=True)
+        
+        # 记录错误
+        record_error(
+            error_type="query_processing_error",
+            message=str(e),
+            component="query_api",
+            details={
+                "query": request.query,
+                "processing_time": processing_time,
+                "user_id": request.user_id,
+                "filter": request.filter
+            }
+        )
+        
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"处理查询失败: {str(e)}"

@@ -211,28 +211,46 @@ function Dashboard({ showNotification }) {
     }
   };
 
-  // 获取最近查询 - 这个API可能不存在，添加错误处理
+  // 获取最近查询
   const fetchRecentQueries = async () => {
     try {
-      // 这个方法在API中可能不存在，所以添加错误处理
-      // 尝试使用getStatistics获取查询数据
-      const response = await adminAPI.getStatistics();
+      // 使用新的API端点获取查询历史
+      const response = await adminAPI.getRecentQueries(10);
       
-      // 假设我们可以从统计数据中获取查询历史
-      // 如果不存在，使用空数组
-      setRecentQueries(response.recent_queries || []);
+      if (response && response.queries) {
+        setRecentQueries(response.queries.map(query => ({
+          id: query.timestamp,
+          query: query.query_text,
+          time: query.query_time,
+          responseTime: query.processing_time.toFixed(2),
+          status: 'success'
+        })));
+      } else {
+        setRecentQueries([]);
+      }
     } catch (error) {
       console.error('Failed to fetch recent queries:', error);
-      // 设置空数组，表示没有查询
       setRecentQueries([]);
     }
   };
 
-  // 获取最近错误 - 这个API可能不存在，添加错误处理
+  // 获取最近错误
   const fetchRecentErrors = async () => {
     try {
-      // 这个方法在API中可能不存在，所以使用空数组
-      setRecentErrors([]);
+      // 使用新的API端点获取错误日志
+      const response = await adminAPI.getErrorLogs(10);
+      
+      if (response && response.errors) {
+        setRecentErrors(response.errors.map(error => ({
+          id: error.timestamp,
+          message: error.message,
+          component: error.component,
+          time: error.error_time,
+          type: error.error_type
+        })));
+      } else {
+        setRecentErrors([]);
+      }
     } catch (error) {
       console.error('Failed to fetch recent errors:', error);
       setRecentErrors([]);
@@ -481,17 +499,17 @@ function Dashboard({ showNotification }) {
                           <TableRow key={index} hover>
                             <TableCell>
                               <Typography variant="body2" noWrap sx={{ maxWidth: 220 }}>
-                                {query.query_text}
+                                {query.query}
                               </Typography>
                             </TableCell>
                             <TableCell align="right">
                               <Typography variant="body2">
-                                {query.response_time?.toFixed(2) || 'N/A'}秒
+                                {query.responseTime}秒
                               </Typography>
                             </TableCell>
                             <TableCell align="right">
                               <Typography variant="body2">
-                                {formatDate(query.timestamp)}
+                                {query.time || formatDate(query.id)}
                               </Typography>
                             </TableCell>
                           </TableRow>
@@ -526,13 +544,13 @@ function Dashboard({ showNotification }) {
                     {recentErrors.slice(0, 5).map((error, index) => (
                       <Alert severity="error" sx={{ mb: 2 }} key={index}>
                         <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                          {error.error_type}
+                          {error.type}
                         </Typography>
                         <Typography variant="body2">
                           {error.message}
                         </Typography>
                         <Typography variant="caption" color="textSecondary">
-                          {formatDate(error.timestamp)} | {error.component}
+                          {error.time || formatDate(error.id)} | {error.component}
                         </Typography>
                       </Alert>
                     ))}

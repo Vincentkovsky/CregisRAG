@@ -57,6 +57,9 @@ class LLMService:
         self.max_tokens = self.config.get("max_tokens", 2000)
         self.timeout = self.config.get("timeout", 60)
         
+        # 初始化客户端为None
+        self.client = None
+        
         # 验证配置
         self._validate_config()
         

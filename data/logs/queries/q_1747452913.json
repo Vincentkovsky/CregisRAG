@@ -1,0 +1,42 @@
+{
+  "timestamp": 1747452913.857302,
+  "query_text": "什么是energy delegation？",
+  "answer": "根据提供的文档内容，energy delegation在这里指的是一种通过API调用获取能量（energy）以执行交易的过程。在TRON网络上，发送交易需要消耗能量。这些文档描述了如何通过调用`/api/tron/transfer`和`/api/tron/collect`接口来获取能量，以便发送者（sender）可以在单个请求中发送多个交易。这种能量必须在10分钟内使用完成，否则将会被回收。然而，文档中并没有直接提到“energy delegation”这个术语的定义，这是我从文档描述中推断出来的。\n\n如果“energy delegation”在文档中指的是一个特定的概念或流程，而我没有直接回答到，那么我必须坦诚说明：文档中没有直接解释“energy delegation”的定义。",
+  "sources": [
+    {
+      "document_id": "a7c5a03d-5136-4c0f-b65a-36a8029fc56b",
+      "document_name": "Energy Service API Description.pdf",
+      "text": "APIInterfaceDocumentation\nTransferScenario\nWhenatransferisneeded,thisAPIshouldbecalledtoobtainenergy.Youcanget\nenergytosendmultipletransactionsinasinglerequest.Pleaseensurethatthe\ntransactionsarecompletedwithin10minutes;otherwise,theenergywillbereclaimed\nafterthe10-minuteperiod.\nAPIDocumentation\nAPIURL:https://gastation.cregis.io/api/tron/transfer\nRequestMethod:POSTapplication/json\nRequestParameters:\n key:TheAPIvalidationkeyprovidedbytheprovider.Pleaseensurethatthiskeyis\nstoredsecurelyandnotleaked.\n sender:Thesendingaddressforthetransaction,whichneedstheenergy.\n count:Anintegervaluerepresentingthenumberoftransactionstobetransferred.\nRequestExample:\nCollectionScenario\nForcollectionscenarios,thisAPIisusedtoobtainenergyandcompletetheaddress\ncollection.Pleaseensurethatthetransactionsarecompletedwithin10minutes;\notherwise,theenergywillbereclaimedafterthe10-minuteperiod.\nAPIDocumentation\nAPIURL:https://gastation.cregis.io/api/tron/collect\nRequestMethod:POSTapplication/json\nRequestParamete",
+      "score": 0.5991982452199264,
+      "metadata": {
+        "author": "宇",
+        "chunk_count": 3,
+        "chunk_index": 0,
+        "chunk_overlap": 200,
+        "chunk_size": 1000,
+        "chunker": "recursive",
+        "creator": "WPS 文字",
+        "detect_language": true,
+        "document_id": "a7c5a03d-5136-4c0f-b65a-36a8029fc56b",
+        "extract_images": false,
+        "extract_metadata": true,
+        "file_name": "a0269efe-1280-4795-9e66-53c281681336.pdf",
+        "file_path": "data/raw/a0269efe-1280-4795-9e66-53c281681336.pdf",
+        "file_size": 390775,
+        "file_type": "pdf",
+        "filename": "Energy Service API Description.pdf",
+        "mime_type": "application/pdf",
+        "page_count": 3,
+        "producer": "macOS 版本10.15.7（版号19H2026） Quartz PDFContext",
+        "upload_time": "2025-05-17 00:25:23"
+      }
+    }
+  ],
+  "processing_time": 6.911139965057373,
+  "token_usage": {
+    "prompt_tokens": 1429,
+    "completion_tokens": 153,
+    "total_tokens": 1582
+  },
+  "query_time": "2025-05-17 11:35:13"
+}

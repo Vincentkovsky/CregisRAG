@@ -1,0 +1,23 @@
+{
+  "timestamp": 1747453709.257177,
+  "query_text": "测试查询内容",
+  "answer": "这是一个测试回答",
+  "sources": [
+    {
+      "document_id": "doc123",
+      "document_name": "测试文档.pdf",
+      "text": "这是文档的内容片段",
+      "score": 0.85,
+      "metadata": {
+        "filename": "测试文档.pdf"
+      }
+    }
+  ],
+  "processing_time": 1.23,
+  "token_usage": {
+    "prompt_tokens": 100,
+    "completion_tokens": 50,
+    "total_tokens": 150
+  },
+  "query_time": "2025-05-17 11:48:29"
+}

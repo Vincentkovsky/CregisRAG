@@ -1,0 +1,11 @@
+{
+  "timestamp": 1747453177.801965,
+  "error_type": "test_error",
+  "message": "这是一个测试错误",
+  "component": "test_component",
+  "details": {
+    "query": "测试查询",
+    "processing_time": 0.5
+  },
+  "error_time": "2025-05-17 11:39:37"
+}

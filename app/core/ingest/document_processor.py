@@ -9,9 +9,29 @@ import logging
 import time
 from typing import List, Dict, Any, Optional, BinaryIO, Union, Callable
 import mimetypes
+from dataclasses import dataclass, field
+import uuid
 
 # 配置日志
 logger = logging.getLogger(__name__)
+
+@dataclass
+class DocumentChunk:
+    """文档片段类"""
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    document_id: str = ""
+    content: str = ""
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    embedding: Optional[List[float]] = None
+    similarity: float = 0.0
+
+@dataclass
+class Document:
+    """文档类"""
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    text: str = ""
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    chunks: List[DocumentChunk] = field(default_factory=list)
 
 class DocumentProcessor:
     """

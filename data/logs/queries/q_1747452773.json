@@ -1,0 +1,42 @@
+{
+  "timestamp": 1747452773.45088,
+  "query_text": "教我怎么做energy delegation",
+  "answer": "根据提供的文档内容，没有直接提及如何进行energy delegation（能量委托）。然而，文档中涉及到了如何通过API获取能量以发送交易。以下是使用这些API进行能量获取的基本步骤，这可能和能量委托有一定的关联：\n\n### 获取能量（Transfer Scenario）\n\n1. 使用以下API URL：\n   ```\n   https://gastation.cregis.io/api/tron/transfer\n   ```\n   \n2. 采用POST方法，并设置`Content-Type`为`application/json`。\n\n3. 请求参数包括：\n   - `key`: 由提供者提供的API验证密钥，需要安全存储，不要泄露。\n   - `sender`: 需要能量的交易发送地址。\n   - `count`: 要转移的交易数量。\n\n4. 请求示例（JSON格式）：\n   ```json\n   {\n     \"key\": \"your_api_key\",\n     \"sender\": \"sending_address\",\n     \"count\": 10\n   }\n   ```\n\n5. 确保所有交易在10分钟内完成，否则，10分钟后能量将被回收。\n\n### 收集能量（Collection Scenario）\n\n1. 使用以下API URL：\n   ```\n   https://gastation.cregis.io/api/tron/collect\n   ```\n   \n2. 采用POST方法，并设置`Content-Type`为`application/json`。\n\n3. 请求参数与上述类似，包括`key`和`sender`。\n\n4. 请求示例（JSON格式）：\n   ```json\n   {\n     \"key\": \"your_api_key\",\n     \"sender\": \"sending_address\"\n   }\n   ```\n\n5. 同样，确保交易在10分钟内完成。\n\n### 检查余额（Check Balance）\n\n1. 使用以下API URL：\n   ```\n   https://gastation.cregis.io/api/tron/credit\n   ```\n   \n2. 采用GET方法。\n\n3. 请求参数包括：\n   - `key`: API验证密钥。\n\n请注意，这些步骤描述了如何获取和收集能量以进行交易，但并不直接说明如何进行能量委托。如果能量委托是您特定的需求，您可能需要查找其他专门的API或服务来实现这一目的。如果需要进一步关于能量委托的详细信息，建议查找相关文档或咨询服务提供者。",
+  "sources": [
+    {
+      "document_id": "aa9a5af9-3b9a-46fb-ba2a-a770602a19e4",
+      "document_name": "Energy Service API Description.pdf",
+      "text": "APIInterfaceDocumentation\nTransferScenario\nWhenatransferisneeded,thisAPIshouldbecalledtoobtainenergy.Youcanget\nenergytosendmultipletransactionsinasinglerequest.Pleaseensurethatthe\ntransactionsarecompletedwithin10minutes;otherwise,theenergywillbereclaimed\nafterthe10-minuteperiod.\nAPIDocumentation\nAPIURL:https://gastation.cregis.io/api/tron/transfer\nRequestMethod:POSTapplication/json\nRequestParameters:\n key:TheAPIvalidationkeyprovidedbytheprovider.Pleaseensurethatthiskeyis\nstoredsecurelyandnotleaked.\n sender:Thesendingaddressforthetransaction,whichneedstheenergy.\n count:Anintegervaluerepresentingthenumberoftransactionstobetransferred.\nRequestExample:\nCollectionScenario\nForcollectionscenarios,thisAPIisusedtoobtainenergyandcompletetheaddress\ncollection.Pleaseensurethatthetransactionsarecompletedwithin10minutes;\notherwise,theenergywillbereclaimedafterthe10-minuteperiod.\nAPIDocumentation\nAPIURL:https://gastation.cregis.io/api/tron/collect\nRequestMethod:POSTapplication/json\nRequestParamete",
+      "score": 0.6365918572624938,
+      "metadata": {
+        "author": "宇",
+        "chunk_count": 3,
+        "chunk_index": 0,
+        "chunk_overlap": 200,
+        "chunk_size": 1000,
+        "chunker": "recursive",
+        "creator": "WPS 文字",
+        "detect_language": true,
+        "document_id": "aa9a5af9-3b9a-46fb-ba2a-a770602a19e4",
+        "extract_images": false,
+        "extract_metadata": true,
+        "file_name": "2ddc52fb-4e59-493a-a373-67df2b235774.pdf",
+        "file_path": "data/raw/2ddc52fb-4e59-493a-a373-67df2b235774.pdf",
+        "file_size": 390775,
+        "file_type": "pdf",
+        "filename": "Energy Service API Description.pdf",
+        "mime_type": "application/pdf",
+        "page_count": 3,
+        "producer": "macOS 版本10.15.7（版号19H2026） Quartz PDFContext",
+        "upload_time": "2025-05-17 00:15:31"
+      }
+    }
+  ],
+  "processing_time": 16.75163698196411,
+  "token_usage": {
+    "prompt_tokens": 1432,
+    "completion_tokens": 471,
+    "total_tokens": 1903
+  },
+  "query_time": "2025-05-17 11:32:53"
+}

@@ -1,0 +1,24 @@
+{
+  "timestamp": 1747453331.928708,
+  "error_type": "request_validation_error",
+  "message": "[{'type': 'missing', 'loc': ('body', 'query'), 'msg': 'Field required', 'input': {'invalid_field': 'test'}}]",
+  "component": "POST_/api/query",
+  "details": {
+    "path": "http://localhost:8000/api/query",
+    "method": "POST",
+    "errors": [
+      {
+        "type": "missing",
+        "loc": [
+          "body",
+          "query"
+        ],
+        "msg": "Field required",
+        "input": {
+          "invalid_field": "test"
+        }
+      }
+    ]
+  },
+  "error_time": "2025-05-17 11:42:11"
+}

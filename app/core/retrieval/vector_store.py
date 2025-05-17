@@ -70,6 +70,19 @@ class VectorStore(ABC):
         pass
     
     @abstractmethod
+    async def get_document_chunk(self, chunk_id: str) -> Optional[Any]:
+        """
+        获取文档片段
+        
+        Args:
+            chunk_id: 文档片段ID
+            
+        Returns:
+            文档片段对象，如果不存在则返回None
+        """
+        pass
+    
+    @abstractmethod
     async def delete_documents(self, document_ids: List[str]) -> bool:
         """
         删除文档
@@ -299,13 +312,17 @@ class ChromaVectorStore(VectorStore):
                     
                     # 创建结果文档
                     document = {
-                        "document_id": doc_id,
+                        "id": doc_id,  # 使用id字段而不是document_id
                         "text": results["documents"][0][i] if "documents" in results and results["documents"] else "",
                         "metadata": results["metadatas"][0][i] if "metadatas" in results and results["metadatas"] else {},
-                        "score": similarity
+                        "similarity": similarity  # 使用similarity字段而不是score
                     }
                     
                     documents.append(document)
+                
+                # 添加调试日志
+                if documents:
+                    logger.info(f"第一个文档结构: {documents[0]}")
             
             logger.info(f"相似度搜索完成, 匹配 {len(documents)} 个文档, 耗时: {time.time() - start_time:.2f}秒")
             return documents
@@ -341,6 +358,42 @@ class ChromaVectorStore(VectorStore):
             
         except Exception as e:
             logger.error(f"从Chroma获取文档失败: {str(e)}")
+            return None
+    
+    async def get_document_chunk(self, chunk_id: str) -> Optional[Any]:
+        """
+        获取文档片段
+        
+        Args:
+            chunk_id: 文档片段ID
+            
+        Returns:
+            文档片段对象，如果不存在则返回None
+        """
+        if not self.collection:
+            raise ValueError("Chroma集合未初始化")
+        
+        try:
+            from app.core.ingest.document_processor import DocumentChunk
+            
+            result = self.collection.get(ids=[chunk_id])
+            
+            if result and result["ids"] and len(result["ids"]) > 0:
+                # 创建并返回DocumentChunk对象
+                metadata = result["metadatas"][0] if "metadatas" in result and result["metadatas"] else {}
+                text = result["documents"][0] if "documents" in result and result["documents"] else ""
+                
+                return DocumentChunk(
+                    id=chunk_id,
+                    document_id=metadata.get("document_id", ""),
+                    content=text,
+                    metadata=metadata
+                )
+            
+            return None
+            
+        except Exception as e:
+            logger.error(f"从Chroma获取文档片段失败: {str(e)}")
             return None
     
     async def delete_documents(self, document_ids: List[str]) -> bool:
@@ -462,6 +515,38 @@ class ChromaVectorStore(VectorStore):
         except Exception as e:
             logger.error(f"获取所有文档元数据失败: {str(e)}")
             return []
+    
+    async def get_document_count(self) -> int:
+        """
+        获取文档数量
+        
+        Returns:
+            文档数量
+        """
+        if not self.collection:
+            raise ValueError("Chroma集合未初始化")
+            
+        try:
+            return self.collection.count()
+        except Exception as e:
+            logger.error(f"获取文档数量失败: {str(e)}")
+            return 0
+    
+    async def get_vector_count(self) -> int:
+        """
+        获取向量数量
+        
+        Returns:
+            向量数量（在Chroma中通常与文档数量相同）
+        """
+        if not self.collection:
+            raise ValueError("Chroma集合未初始化")
+            
+        try:
+            return self.collection.count()
+        except Exception as e:
+            logger.error(f"获取向量数量失败: {str(e)}")
+            return 0
 
 
 def create_vector_store(config: Dict[str, Any]) -> VectorStore:

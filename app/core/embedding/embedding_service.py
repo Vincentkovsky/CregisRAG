@@ -8,8 +8,11 @@ import logging
 import time
 import os
 import re
-from typing import List, Dict, Any, Optional, Union
+from typing import List, Dict, Any, Optional, Union, Tuple
 import numpy as np
+
+# 导入文本预处理器
+from .text_processor import TextProcessor, create_text_processor
 
 # 配置日志
 logger = logging.getLogger(__name__)
@@ -59,11 +62,20 @@ class EmbeddingService:
         self.batch_size = self.config.get("batch_size", 8)
         self.cache_enabled = self.config.get("cache_enabled", True)
         
-        # 嵌入缓存
-        self._cache = {} if self.cache_enabled else None
+        # 嵌入缓存 - 使用两级缓存，原始文本和处理后文本分别缓存
+        self._raw_cache = {} if self.cache_enabled else None  # 原始文本嵌入缓存
+        self._processed_cache = {} if self.cache_enabled else None  # 处理后文本嵌入缓存
         
         # 嵌入客户端
         self.client = None
+        
+        # 创建文本预处理器
+        self.text_processor = create_text_processor(self.config.get("text_processor", {}))
+        
+        # 优化配置
+        self.query_expansion_enabled = self.config.get("query_expansion_enabled", True)
+        self.hybrid_search_weight = self.config.get("hybrid_search_weight", 0.5)  # 混合搜索中文本匹配和向量相似度的权重
+        self.normalize_embeddings = self.config.get("normalize_embeddings", True)  # 是否对嵌入向量进行归一化
         
         logger.info(f"初始化嵌入服务: 提供商={self.provider}, 模型={self.model_name}")
     
@@ -140,25 +152,27 @@ class EmbeddingService:
             logger.error(f"嵌入服务初始化失败: {str(e)}")
             return False
     
-    async def embed_text(self, text: str) -> np.ndarray:
+    async def embed_text(self, text: str, preprocess: bool = True) -> np.ndarray:
         """
         嵌入单个文本
         
         Args:
             text: 要嵌入的文本
+            preprocess: 是否进行文本预处理
             
         Returns:
             文本的向量表示
         """
-        result = await self.embed_texts([text])
+        result = await self.embed_texts([text], preprocess=preprocess)
         return result[0]
     
-    async def embed_texts(self, texts: List[str]) -> List[np.ndarray]:
+    async def embed_texts(self, texts: List[str], preprocess: bool = True) -> List[np.ndarray]:
         """
         批量嵌入多个文本
         
         Args:
             texts: 要嵌入的文本列表
+            preprocess: 是否进行文本预处理
             
         Returns:
             向量表示列表
@@ -166,25 +180,39 @@ class EmbeddingService:
         if not texts:
             logger.warning("收到空文本列表进行嵌入")
             return []
+            
+        # 文本预处理
+        if preprocess:
+            processed_texts = [self.text_processor.process_for_embedding(text) for text in texts]
+        else:
+            processed_texts = texts
         
         # 检查缓存
         if self.cache_enabled:
+            # 确定使用哪个缓存
+            cache = self._processed_cache if preprocess else self._raw_cache
+            
             cache_hits = []
             texts_to_embed = []
+            original_indices = []
             
-            for text in texts:
-                if text in self._cache:
-                    cache_hits.append(self._cache[text])
+            for i, text in enumerate(processed_texts):
+                if text in cache:
+                    cache_hits.append((i, cache[text]))
                 else:
-                    cache_hits.append(None)
                     texts_to_embed.append(text)
+                    original_indices.append(i)
                     
             # 如果全部命中缓存，返回缓存结果
             if not texts_to_embed:
-                return [hit for hit in cache_hits if hit is not None]
+                # 按原始顺序重组结果
+                result = [None] * len(processed_texts)
+                for idx, embedding in cache_hits:
+                    result[idx] = embedding
+                return result
         else:
-            texts_to_embed = texts
-            cache_hits = [None] * len(texts)
+            texts_to_embed = processed_texts
+            original_indices = list(range(len(processed_texts)))
         
         # 根据提供商调用嵌入API
         start_time = time.time()
@@ -205,22 +233,29 @@ class EmbeddingService:
             else:
                 raise ValueError(f"不支持的嵌入提供商: {self.provider}")
                 
+            # 嵌入向量归一化（用于余弦相似度）
+            if self.normalize_embeddings:
+                embeddings = [self._normalize_vector(emb) for emb in embeddings]
+                
             # 更新缓存
             if self.cache_enabled:
-                for text, embedding in zip(texts_to_embed, embeddings):
-                    self._cache[text] = embedding
-                    
-                # 合并缓存命中和新嵌入
-                result = []
-                embed_index = 0
+                # 确定使用哪个缓存
+                cache = self._processed_cache if preprocess else self._raw_cache
                 
-                for hit in cache_hits:
-                    if hit is not None:
-                        result.append(hit)
-                    else:
-                        result.append(embeddings[embed_index])
-                        embed_index += 1
-                        
+                for text, embedding in zip(texts_to_embed, embeddings):
+                    cache[text] = embedding
+                    
+                # 按原始顺序重组结果
+                result = [None] * len(processed_texts)
+                
+                # 填充缓存命中
+                for idx, embedding in cache_hits:
+                    result[idx] = embedding
+                    
+                # 填充新嵌入
+                for i, embedding in zip(original_indices, embeddings):
+                    result[i] = embedding
+                    
                 embeddings = result
                 
             embedding_time = time.time() - start_time
@@ -231,13 +266,14 @@ class EmbeddingService:
         except Exception as e:
             logger.error(f"嵌入过程中发生错误: {str(e)}")
             # 返回全零嵌入作为回退
-            return [np.zeros(self.dimension) for _ in range(len(texts_to_embed))]
+            return [np.zeros(self.dimension) for _ in range(len(processed_texts))]
     
     async def embed_query(self, query: str) -> np.ndarray:
         """
         嵌入查询文本
         
-        有些模型对查询和文档使用不同的嵌入方式
+        有些模型对查询和文档使用不同的嵌入方式。
+        该方法还支持查询扩展，通过组合多个相关查询的嵌入提高检索效果。
         
         Args:
             query: 查询文本
@@ -245,7 +281,34 @@ class EmbeddingService:
         Returns:
             查询的向量表示
         """
-        return await self.embed_text(query)
+        try:
+            # 对查询进行特殊处理
+            processed_query = self.text_processor.process_query(query)
+            
+            # 查询扩展
+            if self.query_expansion_enabled:
+                # 生成查询的多个变体
+                query_variants = self.text_processor.expand_query(query)
+                
+                if len(query_variants) > 1:
+                    # 嵌入所有变体
+                    variant_embeddings = await self.embed_texts(query_variants, preprocess=False)
+                    
+                    # 组合变体嵌入
+                    combined_embedding = self._combine_embeddings(variant_embeddings)
+                    
+                    # 可选：对组合后的向量再次归一化
+                    if self.normalize_embeddings:
+                        combined_embedding = self._normalize_vector(combined_embedding)
+                        
+                    return combined_embedding
+            
+            # 如果没有启用查询扩展或没有生成有效变体，则使用常规方式嵌入
+            return await self.embed_text(processed_query, preprocess=False)
+            
+        except Exception as e:
+            logger.error(f"查询嵌入过程中出错: {str(e)}")
+            return np.zeros(self.dimension)
     
     async def _embed_with_openai(self, texts: List[str]) -> List[np.ndarray]:
         """使用OpenAI API嵌入文本"""
@@ -329,6 +392,60 @@ class EmbeddingService:
         except Exception as e:
             logger.error(f"本地嵌入模型错误: {str(e)}")
             return [np.zeros(self.dimension) for _ in range(len(texts))]
+
+    def _normalize_vector(self, vector: np.ndarray) -> np.ndarray:
+        """归一化向量"""
+        norm = np.linalg.norm(vector)
+        if norm > 0:
+            return vector / norm
+        return vector
+
+    def _combine_embeddings(self, embeddings: List[np.ndarray], 
+                           weights: Optional[List[float]] = None) -> np.ndarray:
+        """
+        组合多个嵌入向量
+        
+        Args:
+            embeddings: 嵌入向量列表
+            weights: 每个嵌入向量的权重，如果为None则使用均等权重
+            
+        Returns:
+            组合后的嵌入向量
+        """
+        if not embeddings:
+            return np.zeros(self.dimension)
+            
+        if len(embeddings) == 1:
+            return embeddings[0]
+            
+        if weights is None:
+            # 默认权重：第一个(原始查询)权重更高，其余均等
+            weights = [1.0] + [0.7] * (len(embeddings) - 1)
+            
+        # 截断权重以匹配嵌入数量
+        weights = weights[:len(embeddings)]
+        
+        # 归一化权重
+        weight_sum = sum(weights)
+        if weight_sum > 0:
+            weights = [w / weight_sum for w in weights]
+        else:
+            weights = [1.0 / len(embeddings)] * len(embeddings)
+            
+        # 加权组合
+        combined = np.zeros_like(embeddings[0])
+        for emb, weight in zip(embeddings, weights):
+            combined += emb * weight
+            
+        return combined
+    
+    def clear_cache(self):
+        """清除嵌入缓存"""
+        if self.cache_enabled:
+            self._raw_cache = {}
+            self._processed_cache = {}
+            logger.info("嵌入缓存已清除")
+
 
 def create_embedding_service(config: Dict[str, Any]) -> EmbeddingService:
     """

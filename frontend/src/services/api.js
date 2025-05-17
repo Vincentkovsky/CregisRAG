@@ -134,6 +134,16 @@ export const adminAPI = {
   getStatistics: () => {
     return api.get('/admin/statistics');
   },
+  
+  // 获取最近查询记录
+  getRecentQueries: (limit = 10) => {
+    return api.get(`/admin/recent-queries?limit=${limit}`);
+  },
+  
+  // 获取系统错误日志
+  getErrorLogs: (limit = 10) => {
+    return api.get(`/admin/error-logs?limit=${limit}`);
+  },
 };
 
 // 健康检查API

@@ -68,6 +68,23 @@ def set_env_vars(env_vars: Dict[str, str]) -> None:
     
     logger.info(f"已设置 {len(env_vars)} 个环境变量")
 
+def load_env_variables(env_file: str = ".env") -> Dict[str, str]:
+    """
+    从.env文件加载环境变量并设置到系统环境中
+    
+    这是一个组合函数，先使用load_env_file加载变量，然后使用set_env_vars设置到系统环境中
+    
+    Args:
+        env_file: .env文件的路径
+        
+    Returns:
+        加载的环境变量字典
+    """
+    env_vars = load_env_file(env_file)
+    set_env_vars(env_vars)
+    logger.info(f"已加载并设置 {len(env_vars)} 个环境变量")
+    return env_vars
+
 def get_api_key(provider: str) -> Optional[str]:
     """
     获取指定提供商的API密钥

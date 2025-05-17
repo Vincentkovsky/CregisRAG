@@ -15,6 +15,9 @@ from pydantic import BaseModel, Field
 # 导入RAG引擎
 from app.core.rag_engine import create_rag_engine
 
+# 导入日志处理器
+from app.utils.log_handler import log_handler
+
 # 使用 APIRouter 而不是直接在 FastAPI 应用上定义路由
 router = APIRouter()
 
@@ -37,7 +40,32 @@ async def get_rag_engine():
     global rag_engine
     if rag_engine is None:
         logger.info("初始化RAG引擎")
-        rag_engine = create_rag_engine(rag_config)
+        
+        # 初始化必要的服务
+        from app.core.embedding import create_embedding_service
+        from app.core.generation import create_llm_service
+        from app.core.storage.storage_service import create_storage_service
+        
+        # 创建嵌入服务
+        embedding_service = create_embedding_service(rag_config.get("embedding", {}))
+        await embedding_service.initialize()
+        
+        # 创建LLM服务
+        llm_service = create_llm_service(rag_config.get("llm", {}))
+        await llm_service.initialize()
+        
+        # 创建存储服务
+        storage_service = create_storage_service(rag_config.get("storage", {}))
+        await storage_service.initialize()
+        
+        # 创建RAG引擎并传递所有必要的服务
+        rag_engine = create_rag_engine(
+            rag_config, 
+            llm_service=llm_service,
+            embedding_service=embedding_service,
+            storage_service=storage_service
+        )
+        
         await rag_engine.initialize_services()
     return rag_engine
 
@@ -396,8 +424,6 @@ async def get_statistics(
 ):
     """获取系统使用和性能统计信息"""
     try:
-        # 在实际应用中，应该从数据库或日志中收集统计信息
-        
         # 收集向量存储统计信息
         vector_stats = {}
         if rag_engine.vector_store:
@@ -407,20 +433,13 @@ async def get_statistics(
                     "vector_count": await rag_engine.vector_store.get_vector_count(),
                     "collection_size": 0  # 可以从向量存储中获取
                 }
-            except:
-                pass
+            except Exception as e:
+                logger.error(f"获取向量存储统计信息时出错: {e}")
                 
-        # 收集查询统计信息
-        # 在实际应用中，应该从数据库中查询
-        query_stats = {
-            "total_queries": 0,
-            "queries_last_24h": 0,
-            "avg_query_time": 0,
-            "avg_tokens_per_query": 0
-        }
+        # 从LogHandler获取查询统计信息
+        query_stats = log_handler.get_query_stats()
         
         # 收集文档统计信息
-        # 在实际应用中，应该从数据库中查询
         doc_stats = {
             "total_documents": vector_stats.get("document_count", 0),
             "documents_by_type": {},
@@ -447,6 +466,50 @@ async def get_statistics(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"获取统计信息失败: {str(e)}"
+        )
+
+# 新增：获取最近查询历史
+@router.get(
+    "/admin/recent-queries", 
+    summary="获取最近查询历史",
+    description="获取系统中最近处理的查询记录"
+)
+async def get_recent_queries(limit: int = 10):
+    """获取最近的查询记录"""
+    try:
+        # 从LogHandler获取最近查询
+        recent_queries = log_handler.get_recent_queries(limit=limit)
+        return {
+            "queries": recent_queries,
+            "count": len(recent_queries)
+        }
+    except Exception as e:
+        logger.error(f"获取最近查询记录时出错: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"获取最近查询记录失败: {str(e)}"
+        )
+
+# 新增：获取系统错误日志
+@router.get(
+    "/admin/error-logs", 
+    summary="获取系统错误日志",
+    description="获取系统中记录的错误日志"
+)
+async def get_error_logs(limit: int = 10):
+    """获取系统错误日志"""
+    try:
+        # 从LogHandler获取最近错误
+        recent_errors = log_handler.get_recent_errors(limit=limit)
+        return {
+            "errors": recent_errors,
+            "count": len(recent_errors)
+        }
+    except Exception as e:
+        logger.error(f"获取错误日志时出错: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"获取错误日志失败: {str(e)}"
         )
 
 # 辅助函数：执行维护任务
