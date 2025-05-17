@@ -1,0 +1,70 @@
+{
+  "timestamp": 1747454579.717314,
+  "query_text": "企业版一个月多少钱",
+  "answer": "根据提供的文档1和文档2，企业版的月费计划价格为$999。如果选择年费计划，可以立省$398，即年费为$6000。 \n\n```markdown\n企业版月费计划：$999\n企业版年费计划（立省$398）：$6000\n```",
+  "sources": [
+    {
+      "document_id": "0fe7d1dc-3f39-49a7-bc73-11fb88bcdd83",
+      "document_name": "Cregis-价格表单.pdf",
+      "text": "--- 第 1 页 ---\nCregis价格表总览\n企业版 基础版 商业版功能 单位\n钱包\nMPC单签钱包*\nMPC多签钱包*钱包数 � � ��\n� � � 钱包数\nAPI 服务\n 通过API服务\n发送交易\nTron 能量折扣\n普通交易通过API服务\n 生成的子地址*\n归集\n发送额度$��,���/月\n(超出�.�%)�折 �折 �折\n—\n— —�折 �折子地址数 �� ��� ���\n��� ����� ������ 交易笔数\n价格 （美金）\n月费计划\n年费计划免费$��� $���\n$���� \n(立省$398)$���� \n(立省$998)\n功能\n分片管理 支持 支持 支持\n支持 支持 支持 财务管理\n风控引擎\n团队成员*已配置的策略 � � ��\n� �� �� 同团队的成员\n支持自主Token � � � Token数\n--- 第 2 页 ---\n可额外扩充用量的项目\n单位 数量 价格 （美金）\n子地址\n (月费套餐)通过API服务\n生成的子地址数����\n����\n�����\n�����\n无上限$500\n$1500\n$2500\n$3500\n$6800子地址价格表总览\n单位 价格 （美金）\n额外团队成员 （每月有效） 同团队的成员\n钱包数\n钱包数$9.9\n$99\n$99附加功能\n额外的MPC单签钱包 （永久有效）\n额外的MPC多签钱包 （永久有效）\n钱包数 $500 自动收款/签名 （每月有效）\n--- 第 3 页 ---\n定制化方案\n方案 单位 价格\n錢包\n钱包私有化部署\n钱包私有化部署\n＆\nAPI服务串接自托管 或 共管MPC\n风控引擎\n团队管理\n分片管理\n财务管理\n私有云部署 或 服务器机房部署\n自托管 或 共管MPC\n风控引擎\n团队管理\n分片管理\n财务管理\n私有云部署 或 服务器机房部署请联系\nCregis销售团队\nAPI服务串接\n--- 第 4 页 ---",
+      "score": 0.5550120038036157,
+      "metadata": {
+        "chunk_count": 2,
+        "chunk_index": 0,
+        "chunk_overlap": 200,
+        "chunk_size": 1000,
+        "chunker": "recursive",
+        "creator": "Adobe Illustrator 27.5 (Macintosh)",
+        "detect_language": true,
+        "document_id": "0fe7d1dc-3f39-49a7-bc73-11fb88bcdd83",
+        "extract_images": false,
+        "extract_metadata": true,
+        "file_name": "6c4b5c20-1b17-43ad-b693-35cbb2fc85e0.pdf",
+        "file_path": "data/raw/6c4b5c20-1b17-43ad-b693-35cbb2fc85e0.pdf",
+        "file_size": 2070418,
+        "file_type": "pdf",
+        "filename": "Cregis-价格表单.pdf",
+        "mime_type": "application/pdf",
+        "page_count": 4,
+        "producer": "Adobe PDF library 17.00",
+        "title": "Cregis-價格表單（简体）",
+        "upload_time": "2025-05-17 11:17:58"
+      }
+    },
+    {
+      "document_id": "aa9a5af9-3b9a-46fb-ba2a-a770602a19e4",
+      "document_name": "Energy Service API Description.pdf",
+      "text": "QueryBillingRecords\nAPIDescription\nAPIURL:https://gastation.cregis.io/api/tron/credit\nRequestMethod:GET\nRequestParameters:\n key:TheAPIvalidationkey,providedbytheprovider.Pleasekeepthiskeysafeand\ndonotdiscloseit.\n pageNum:Thepagenumber,defaultis1.\n pageSize:Thenumberofrecordsperpage,defaultis10.\n createdTimestampStart:Thestarttimeofthequery(13-digittimestamp),optional.\n createdTimestampEnd:Theendtimeofthequery(13-digittimestamp),optional.\nRequestExample:",
+      "score": 0.46892034762185597,
+      "metadata": {
+        "author": "宇",
+        "chunk_count": 3,
+        "chunk_index": 2,
+        "chunk_overlap": 200,
+        "chunk_size": 1000,
+        "chunker": "recursive",
+        "creator": "WPS 文字",
+        "detect_language": true,
+        "document_id": "aa9a5af9-3b9a-46fb-ba2a-a770602a19e4",
+        "extract_images": false,
+        "extract_metadata": true,
+        "file_name": "2ddc52fb-4e59-493a-a373-67df2b235774.pdf",
+        "file_path": "data/raw/2ddc52fb-4e59-493a-a373-67df2b235774.pdf",
+        "file_size": 390775,
+        "file_type": "pdf",
+        "filename": "Energy Service API Description.pdf",
+        "mime_type": "application/pdf",
+        "page_count": 3,
+        "producer": "macOS 版本10.15.7（版号19H2026） Quartz PDFContext",
+        "upload_time": "2025-05-17 00:15:31"
+      }
+    }
+  ],
+  "processing_time": 8.641532897949219,
+  "token_usage": {
+    "prompt_tokens": 1611,
+    "completion_tokens": 70,
+    "total_tokens": 1681
+  },
+  "query_time": "2025-05-17 12:02:59"
+}

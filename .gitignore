@@ -19,3 +19,7 @@ frontend/build/
 # OS specific
 .DS_Store
 Thumbs.db
+
+
+logs/
+data/logs/

@@ -4818,3 +4818,132 @@ TypeError: RAGEngine.__init__() missing 3 required positional arguments: 'llm_se
 2025-05-17 11:50:14,546 - app.core.retrieval.vector_store - INFO - 已连接到现有集合: documents
 2025-05-17 11:50:14,546 - app.core.storage.storage_service - INFO - 存储服务初始化成功
 2025-05-17 11:50:14,546 - app.core.rag_engine - INFO - RAG引擎初始化完成
+2025-05-17 12:01:16,458 - app.api.routes.ingest - INFO - 初始化RAG引擎
+2025-05-17 12:01:16,459 - app.core.generation.llm_service - INFO - 初始化LLM服务: 提供商=zhipuai, 模型=glm-4
+2025-05-17 12:01:16,460 - app.core.embedding.text_processor - INFO - 已从data/stopwords/chinese_stopwords.txt加载644个停用词
+2025-05-17 12:01:16,460 - app.core.embedding.text_processor - INFO - 文本预处理器初始化完成
+2025-05-17 12:01:16,460 - app.core.embedding.embedding_service - INFO - 初始化嵌入服务: 提供商=zhipuai, 模型=embedding-3
+2025-05-17 12:01:16,460 - app.core.retrieval.vector_store - INFO - 初始化Chroma向量存储: 集合=documents, 持久化目录=data/chroma
+2025-05-17 12:01:16,460 - app.core.storage.storage_service - INFO - 存储服务初始化完成
+2025-05-17 12:01:16,460 - app.core.rag_engine - INFO - RAG引擎初始化完成
+2025-05-17 12:01:16,460 - app.core.rag_engine - INFO - 确保LLM服务已初始化...
+2025-05-17 12:01:16,460 - app.core.generation.llm_service - INFO - 已获取智谱AI API密钥
+2025-05-17 12:01:16,484 - app.core.generation.llm_service - INFO - 初始化智谱AI LLM服务成功, 模型: glm-4
+2025-05-17 12:01:16,484 - app.core.generation.llm_service - INFO - LLM服务初始化成功: zhipuai
+2025-05-17 12:01:16,484 - app.core.rag_engine - INFO - 确保嵌入服务已初始化...
+2025-05-17 12:01:16,484 - app.core.embedding.embedding_service - INFO - 已获取智谱AI API密钥
+2025-05-17 12:01:16,499 - app.core.embedding.embedding_service - INFO - 初始化智谱AI嵌入服务，模型: embedding-3
+2025-05-17 12:01:16,499 - app.core.embedding.embedding_service - INFO - 嵌入服务初始化成功: zhipuai
+2025-05-17 12:01:16,499 - app.core.retrieval.vector_store - INFO - 初始化Chroma向量存储: 集合=documents, 持久化目录=./data/chroma
+2025-05-17 12:01:16,506 - app.core.retrieval.vector_store - INFO - 已连接到现有集合: documents
+2025-05-17 12:01:16,506 - app.core.ingest.chunker - INFO - 初始化文本分块器: 方法=paragraph, 块大小=1000, 重叠=200
+2025-05-17 12:01:16,506 - app.core.ingest.document_processor - INFO - 初始化文档处理器: 支持格式=['pdf', 'txt', 'doc', 'docx', 'md', 'html']
+2025-05-17 12:01:16,506 - app.core.ingest.ingest_service - INFO - 初始化文档摄入服务
+2025-05-17 12:01:16,506 - app.core.embedding.embedding_service - INFO - 已获取智谱AI API密钥
+2025-05-17 12:01:16,522 - app.core.embedding.embedding_service - INFO - 初始化智谱AI嵌入服务，模型: embedding-3
+2025-05-17 12:01:16,522 - app.core.embedding.embedding_service - INFO - 嵌入服务初始化成功: zhipuai
+2025-05-17 12:01:16,524 - app.core.retrieval.vector_store - INFO - 已连接到现有集合: documents
+2025-05-17 12:01:16,524 - app.core.ingest.ingest_service - INFO - 文档摄入服务初始化成功
+2025-05-17 12:01:16,524 - app.core.rag_engine - INFO - 所有服务初始化完成
+2025-05-17 12:01:16,533 - app.core.retrieval.vector_store - INFO - 已检索 16 个文档的元数据
+2025-05-17 12:01:16,541 - app.core.retrieval.vector_store - INFO - 已检索 16 个文档的元数据
+2025-05-17 12:01:16,546 - app.core.retrieval.vector_store - INFO - 已检索 16 个文档的元数据
+2025-05-17 12:01:16,553 - app.core.retrieval.vector_store - INFO - 已检索 16 个文档的元数据
+2025-05-17 12:01:20,000 - app.core.retrieval.vector_store - INFO - 已检索 16 个文档的元数据
+2025-05-17 12:01:20,015 - app.core.retrieval.vector_store - INFO - 已检索 16 个文档的元数据
+2025-05-17 12:01:20,022 - app.core.retrieval.vector_store - INFO - 已检索 16 个文档的元数据
+2025-05-17 12:01:20,032 - app.core.retrieval.vector_store - INFO - 已检索 16 个文档的元数据
+2025-05-17 12:01:28,515 - app.api.routes.query - INFO - 初始化RAG引擎
+2025-05-17 12:01:28,515 - app.core.generation.llm_service - INFO - 初始化LLM服务: 提供商=zhipuai, 模型=glm-4
+2025-05-17 12:01:28,516 - app.core.embedding.text_processor - INFO - 已从data/stopwords/chinese_stopwords.txt加载644个停用词
+2025-05-17 12:01:28,516 - app.core.embedding.text_processor - INFO - 文本预处理器初始化完成
+2025-05-17 12:01:28,516 - app.core.embedding.embedding_service - INFO - 初始化嵌入服务: 提供商=zhipuai, 模型=embedding-3
+2025-05-17 12:01:28,516 - app.core.retrieval.vector_store - INFO - 初始化Chroma向量存储: 集合=documents, 持久化目录=data/chroma
+2025-05-17 12:01:28,516 - app.core.storage.storage_service - INFO - 存储服务初始化完成
+2025-05-17 12:01:28,516 - app.core.rag_engine - INFO - RAG引擎初始化完成
+2025-05-17 12:01:28,516 - app.core.rag_engine - INFO - 确保LLM服务已初始化...
+2025-05-17 12:01:28,516 - app.core.generation.llm_service - INFO - 已获取智谱AI API密钥
+2025-05-17 12:01:28,546 - app.core.generation.llm_service - INFO - 初始化智谱AI LLM服务成功, 模型: glm-4
+2025-05-17 12:01:28,546 - app.core.generation.llm_service - INFO - LLM服务初始化成功: zhipuai
+2025-05-17 12:01:28,546 - app.core.rag_engine - INFO - 确保嵌入服务已初始化...
+2025-05-17 12:01:28,546 - app.core.embedding.embedding_service - INFO - 已获取智谱AI API密钥
+2025-05-17 12:01:28,565 - app.core.embedding.embedding_service - INFO - 初始化智谱AI嵌入服务，模型: embedding-3
+2025-05-17 12:01:28,565 - app.core.embedding.embedding_service - INFO - 嵌入服务初始化成功: zhipuai
+2025-05-17 12:01:28,566 - app.core.retrieval.vector_store - INFO - 初始化Chroma向量存储: 集合=documents, 持久化目录=./data/chroma
+2025-05-17 12:01:28,567 - app.core.retrieval.vector_store - INFO - 已连接到现有集合: documents
+2025-05-17 12:01:28,567 - app.core.ingest.chunker - INFO - 初始化文本分块器: 方法=paragraph, 块大小=1000, 重叠=200
+2025-05-17 12:01:28,567 - app.core.ingest.document_processor - INFO - 初始化文档处理器: 支持格式=['pdf', 'txt', 'doc', 'docx', 'md', 'html']
+2025-05-17 12:01:28,568 - app.core.ingest.ingest_service - INFO - 初始化文档摄入服务
+2025-05-17 12:01:28,568 - app.core.embedding.embedding_service - INFO - 已获取智谱AI API密钥
+2025-05-17 12:01:28,583 - app.core.embedding.embedding_service - INFO - 初始化智谱AI嵌入服务，模型: embedding-3
+2025-05-17 12:01:28,583 - app.core.embedding.embedding_service - INFO - 嵌入服务初始化成功: zhipuai
+2025-05-17 12:01:28,584 - app.core.retrieval.vector_store - INFO - 已连接到现有集合: documents
+2025-05-17 12:01:28,585 - app.core.ingest.ingest_service - INFO - 文档摄入服务初始化成功
+2025-05-17 12:01:28,585 - app.core.rag_engine - INFO - 所有服务初始化完成
+2025-05-17 12:01:28,585 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-17 12:01:28,753 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-17 12:01:28,965 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-17 12:01:29,786 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-17 12:01:29,849 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-17 12:01:29,952 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-17 12:01:30,147 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-17 12:01:30,322 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-17 12:01:30,433 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-17 12:01:30,707 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-17 12:01:30,827 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-17 12:01:31,116 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-17 12:01:31,791 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-17 12:01:32,221 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-17 12:01:32,423 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-17 12:01:32,454 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-17 12:01:32,608 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-17 12:01:32,711 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-17 12:01:33,175 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-17 12:01:33,270 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-17 12:01:33,526 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-17 12:01:33,696 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-17 12:01:33,924 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-17 12:01:34,218 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-17 12:01:35,312 - app.api.routes.query - INFO - 接收到查询: 商业版怎么收费
+2025-05-17 12:01:35,312 - app.core.rag_engine - INFO - 开始处理查询: 商业版怎么收费
+2025-05-17 12:01:35,312 - jieba - DEBUG - Building prefix dict from the default dictionary ...
+2025-05-17 12:01:35,313 - jieba - DEBUG - Loading model from cache /var/folders/lj/nhgwx23s147bp382mjd1md0m0000gn/T/jieba.cache
+2025-05-17 12:01:35,611 - jieba - DEBUG - Loading model cost 0.299 seconds.
+2025-05-17 12:01:35,611 - jieba - DEBUG - Prefix dict has been built successfully.
+2025-05-17 12:01:36,137 - httpx - INFO - HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/embeddings "HTTP/1.1 200 OK"
+2025-05-17 12:01:36,249 - app.core.embedding.embedding_service - INFO - 嵌入完成: 3 个文本, 耗时: 0.43秒
+2025-05-17 12:01:36,249 - app.core.rag_engine - INFO - 开始检索文档: 商业版怎么收费
+2025-05-17 12:01:36,249 - app.core.storage.storage_service - ERROR - 向量存储集合未初始化，尝试重新初始化
+2025-05-17 12:01:36,251 - app.core.retrieval.vector_store - INFO - 已连接到现有集合: documents
+2025-05-17 12:01:36,259 - chromadb.segment.impl.vector.local_persistent_hnsw - WARNING - Number of requested results 20 is greater than number of elements in index 16, updating n_results = 16
+2025-05-17 12:01:36,261 - app.core.retrieval.vector_store - INFO - 第一个文档结构: {'id': 'doc_1747451879_0', 'text': '--- 第 1 页 ---\nCregis价格表总览\n企业版 基础版 商业版功能 单位\n钱包\nMPC单签钱包*\nMPC多签钱包*钱包数 � � ��\n� � � 钱包数\nAPI 服务\n 通过API服务\n发送交易\nTron 能量折扣\n普通交易通过API服务\n 生成的子地址*\n归集\n发送额度$��,���/月\n(超出�.�%)�折 �折 �折\n—\n— —�折 �折子地址数 �� ��� ���\n��� ����� ������ 交易笔数\n价格 （美金）\n月费计划\n年费计划免费$��� $���\n$���� \n(立省$398)$���� \n(立省$998)\n功能\n分片管理 支持 支持 支持\n支持 支持 支持 财务管理\n风控引擎\n团队成员*已配置的策略 � � ��\n� �� �� 同团队的成员\n支持自主Token � � � Token数\n--- 第 2 页 ---\n可额外扩充用量的项目\n单位 数量 价格 （美金）\n子地址\n (月费套餐)通过API服务\n生成的子地址数����\n����\n�����\n�����\n无上限$500\n$1500\n$2500\n$3500\n$6800子地址价格表总览\n单位 价格 （美金）\n额外团队成员 （每月有效） 同团队的成员\n钱包数\n钱包数$9.9\n$99\n$99附加功能\n额外的MPC单签钱包 （永久有效）\n额外的MPC多签钱包 （永久有效）\n钱包数 $500 自动收款/签名 （每月有效）\n--- 第 3 页 ---\n定制化方案\n方案 单位 价格\n錢包\n钱包私有化部署\n钱包私有化部署\n＆\nAPI服务串接自托管 或 共管MPC\n风控引擎\n团队管理\n分片管理\n财务管理\n私有云部署 或 服务器机房部署\n自托管 或 共管MPC\n风控引擎\n团队管理\n分片管理\n财务管理\n私有云部署 或 服务器机房部署请联系\nCregis销售团队\nAPI服务串接\n--- 第 4 页 ---', 'metadata': {'chunk_count': 2, 'chunk_index': 0, 'chunk_overlap': 200, 'chunk_size': 1000, 'chunker': 'recursive', 'creator': 'Adobe Illustrator 27.5 (Macintosh)', 'detect_language': True, 'document_id': '0fe7d1dc-3f39-49a7-bc73-11fb88bcdd83', 'extract_images': False, 'extract_metadata': True, 'file_name': '6c4b5c20-1b17-43ad-b693-35cbb2fc85e0.pdf', 'file_path': 'data/raw/6c4b5c20-1b17-43ad-b693-35cbb2fc85e0.pdf', 'file_size': 2070418, 'file_type': 'pdf', 'filename': 'Cregis-价格表单.pdf', 'mime_type': 'application/pdf', 'page_count': 4, 'producer': 'Adobe PDF library 17.00', 'title': 'Cregis-價格表單（简体）', 'upload_time': '2025-05-17 11:17:58'}, 'similarity': 0.5827169971134732}
+2025-05-17 12:01:36,261 - app.core.retrieval.vector_store - INFO - 相似度搜索完成, 匹配 16 个文档, 耗时: 0.01秒
+2025-05-17 12:01:36,264 - app.core.rag_engine - INFO - 检索完成: 找到 5 个文档片段, 耗时: 0.01秒
+2025-05-17 12:01:36,264 - app.core.generation.llm_service - INFO - 开始LLM生成: 模型=glm-4, 温度=0.3
+2025-05-17 12:01:44,912 - httpx - INFO - HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+2025-05-17 12:01:44,915 - app.core.generation.llm_service - INFO - LLM生成完成, 耗时: 8.65秒
+2025-05-17 12:01:44,916 - app.core.rag_engine - INFO - 查询处理完成，耗时: 9.60秒
+2025-05-17 12:01:46,493 - app.api.routes.query - INFO - 接收到查询: 商业版怎么收费
+2025-05-17 12:01:46,494 - app.core.rag_engine - INFO - 开始处理查询: 商业版怎么收费
+2025-05-17 12:01:46,494 - app.core.rag_engine - INFO - 开始检索文档: 商业版怎么收费
+2025-05-17 12:01:46,496 - chromadb.segment.impl.vector.local_persistent_hnsw - WARNING - Number of requested results 20 is greater than number of elements in index 16, updating n_results = 16
+2025-05-17 12:01:46,500 - app.core.retrieval.vector_store - INFO - 第一个文档结构: {'id': 'doc_1747451879_0', 'text': '--- 第 1 页 ---\nCregis价格表总览\n企业版 基础版 商业版功能 单位\n钱包\nMPC单签钱包*\nMPC多签钱包*钱包数 � � ��\n� � � 钱包数\nAPI 服务\n 通过API服务\n发送交易\nTron 能量折扣\n普通交易通过API服务\n 生成的子地址*\n归集\n发送额度$��,���/月\n(超出�.�%)�折 �折 �折\n—\n— —�折 �折子地址数 �� ��� ���\n��� ����� ������ 交易笔数\n价格 （美金）\n月费计划\n年费计划免费$��� $���\n$���� \n(立省$398)$���� \n(立省$998)\n功能\n分片管理 支持 支持 支持\n支持 支持 支持 财务管理\n风控引擎\n团队成员*已配置的策略 � � ��\n� �� �� 同团队的成员\n支持自主Token � � � Token数\n--- 第 2 页 ---\n可额外扩充用量的项目\n单位 数量 价格 （美金）\n子地址\n (月费套餐)通过API服务\n生成的子地址数����\n����\n�����\n�����\n无上限$500\n$1500\n$2500\n$3500\n$6800子地址价格表总览\n单位 价格 （美金）\n额外团队成员 （每月有效） 同团队的成员\n钱包数\n钱包数$9.9\n$99\n$99附加功能\n额外的MPC单签钱包 （永久有效）\n额外的MPC多签钱包 （永久有效）\n钱包数 $500 自动收款/签名 （每月有效）\n--- 第 3 页 ---\n定制化方案\n方案 单位 价格\n錢包\n钱包私有化部署\n钱包私有化部署\n＆\nAPI服务串接自托管 或 共管MPC\n风控引擎\n团队管理\n分片管理\n财务管理\n私有云部署 或 服务器机房部署\n自托管 或 共管MPC\n风控引擎\n团队管理\n分片管理\n财务管理\n私有云部署 或 服务器机房部署请联系\nCregis销售团队\nAPI服务串接\n--- 第 4 页 ---', 'metadata': {'chunk_count': 2, 'chunk_index': 0, 'chunk_overlap': 200, 'chunk_size': 1000, 'chunker': 'recursive', 'creator': 'Adobe Illustrator 27.5 (Macintosh)', 'detect_language': True, 'document_id': '0fe7d1dc-3f39-49a7-bc73-11fb88bcdd83', 'extract_images': False, 'extract_metadata': True, 'file_name': '6c4b5c20-1b17-43ad-b693-35cbb2fc85e0.pdf', 'file_path': 'data/raw/6c4b5c20-1b17-43ad-b693-35cbb2fc85e0.pdf', 'file_size': 2070418, 'file_type': 'pdf', 'filename': 'Cregis-价格表单.pdf', 'mime_type': 'application/pdf', 'page_count': 4, 'producer': 'Adobe PDF library 17.00', 'title': 'Cregis-價格表單（简体）', 'upload_time': '2025-05-17 11:17:58'}, 'similarity': 0.5827169971134732}
+2025-05-17 12:01:46,500 - app.core.retrieval.vector_store - INFO - 相似度搜索完成, 匹配 16 个文档, 耗时: 0.01秒
+2025-05-17 12:01:46,507 - app.core.rag_engine - INFO - 检索完成: 找到 5 个文档片段, 耗时: 0.01秒
+2025-05-17 12:01:46,507 - app.core.generation.llm_service - INFO - 开始LLM生成: 模型=glm-4, 温度=0.3
+2025-05-17 12:01:54,401 - httpx - INFO - HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+2025-05-17 12:01:54,403 - app.core.generation.llm_service - INFO - LLM生成完成, 耗时: 7.90秒
+2025-05-17 12:01:54,404 - app.core.rag_engine - INFO - 查询处理完成，耗时: 7.91秒
+2025-05-17 12:02:51,075 - app.api.routes.query - INFO - 接收到查询: 企业版一个月多少钱
+2025-05-17 12:02:51,076 - app.core.rag_engine - INFO - 开始处理查询: 企业版一个月多少钱
+2025-05-17 12:02:51,355 - httpx - INFO - HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/embeddings "HTTP/1.1 200 OK"
+2025-05-17 12:02:51,419 - app.core.embedding.embedding_service - INFO - 嵌入完成: 3 个文本, 耗时: 0.34秒
+2025-05-17 12:02:51,419 - app.core.rag_engine - INFO - 开始检索文档: 企业版一个月多少钱
+2025-05-17 12:02:51,420 - chromadb.segment.impl.vector.local_persistent_hnsw - WARNING - Number of requested results 20 is greater than number of elements in index 16, updating n_results = 16
+2025-05-17 12:02:51,421 - app.core.retrieval.vector_store - INFO - 第一个文档结构: {'id': 'doc_1747451879_0', 'text': '--- 第 1 页 ---\nCregis价格表总览\n企业版 基础版 商业版功能 单位\n钱包\nMPC单签钱包*\nMPC多签钱包*钱包数 � � ��\n� � � 钱包数\nAPI 服务\n 通过API服务\n发送交易\nTron 能量折扣\n普通交易通过API服务\n 生成的子地址*\n归集\n发送额度$��,���/月\n(超出�.�%)�折 �折 �折\n—\n— —�折 �折子地址数 �� ��� ���\n��� ����� ������ 交易笔数\n价格 （美金）\n月费计划\n年费计划免费$��� $���\n$���� \n(立省$398)$���� \n(立省$998)\n功能\n分片管理 支持 支持 支持\n支持 支持 支持 财务管理\n风控引擎\n团队成员*已配置的策略 � � ��\n� �� �� 同团队的成员\n支持自主Token � � � Token数\n--- 第 2 页 ---\n可额外扩充用量的项目\n单位 数量 价格 （美金）\n子地址\n (月费套餐)通过API服务\n生成的子地址数����\n����\n�����\n�����\n无上限$500\n$1500\n$2500\n$3500\n$6800子地址价格表总览\n单位 价格 （美金）\n额外团队成员 （每月有效） 同团队的成员\n钱包数\n钱包数$9.9\n$99\n$99附加功能\n额外的MPC单签钱包 （永久有效）\n额外的MPC多签钱包 （永久有效）\n钱包数 $500 自动收款/签名 （每月有效）\n--- 第 3 页 ---\n定制化方案\n方案 单位 价格\n錢包\n钱包私有化部署\n钱包私有化部署\n＆\nAPI服务串接自托管 或 共管MPC\n风控引擎\n团队管理\n分片管理\n财务管理\n私有云部署 或 服务器机房部署\n自托管 或 共管MPC\n风控引擎\n团队管理\n分片管理\n财务管理\n私有云部署 或 服务器机房部署请联系\nCregis销售团队\nAPI服务串接\n--- 第 4 页 ---', 'metadata': {'chunk_count': 2, 'chunk_index': 0, 'chunk_overlap': 200, 'chunk_size': 1000, 'chunker': 'recursive', 'creator': 'Adobe Illustrator 27.5 (Macintosh)', 'detect_language': True, 'document_id': '0fe7d1dc-3f39-49a7-bc73-11fb88bcdd83', 'extract_images': False, 'extract_metadata': True, 'file_name': '6c4b5c20-1b17-43ad-b693-35cbb2fc85e0.pdf', 'file_path': 'data/raw/6c4b5c20-1b17-43ad-b693-35cbb2fc85e0.pdf', 'file_size': 2070418, 'file_type': 'pdf', 'filename': 'Cregis-价格表单.pdf', 'mime_type': 'application/pdf', 'page_count': 4, 'producer': 'Adobe PDF library 17.00', 'title': 'Cregis-價格表單（简体）', 'upload_time': '2025-05-17 11:17:58'}, 'similarity': 0.5550120038036157}
+2025-05-17 12:02:51,421 - app.core.retrieval.vector_store - INFO - 相似度搜索完成, 匹配 16 个文档, 耗时: 0.00秒
+2025-05-17 12:02:51,425 - app.core.rag_engine - INFO - 检索完成: 找到 5 个文档片段, 耗时: 0.01秒
+2025-05-17 12:02:51,425 - app.core.generation.llm_service - INFO - 开始LLM生成: 模型=glm-4, 温度=0.3
+2025-05-17 12:02:59,711 - httpx - INFO - HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+2025-05-17 12:02:59,715 - app.core.generation.llm_service - INFO - LLM生成完成, 耗时: 8.29秒
+2025-05-17 12:02:59,715 - app.core.rag_engine - INFO - 查询处理完成，耗时: 8.64秒
