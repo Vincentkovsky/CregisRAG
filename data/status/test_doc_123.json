@@ -1,0 +1,8 @@
+{
+  "document_id": "test_doc_123",
+  "status": "completed",
+  "progress": 100,
+  "error": null,
+  "created_at": "2025-05-18 00:25:38",
+  "updated_at": "2025-05-18 00:25:38"
+}

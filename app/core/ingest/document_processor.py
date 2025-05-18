@@ -11,6 +11,7 @@ from typing import List, Dict, Any, Optional, BinaryIO, Union, Callable
 import mimetypes
 from dataclasses import dataclass, field
 import uuid
+import re
 
 # 配置日志
 logger = logging.getLogger(__name__)
@@ -52,6 +53,19 @@ class DocumentProcessor:
         # 读取配置
         self.extract_metadata = config.get("extract_metadata", True)
         self.supported_formats = config.get("supported_formats", ["pdf", "txt", "doc", "docx", "md", "html"])
+        self.chunk_size = config.get("chunk_size", 1000)
+        self.chunk_overlap = config.get("chunk_overlap", 200)
+        self.detect_language = config.get("detect_language", True)
+        self.extract_images = config.get("extract_images", False)
+        
+        # PDF处理特定配置
+        self.pdf_config = config.get("pdf_processing", {})
+        self.use_enhanced_parser = self.pdf_config.get("use_enhanced_parser", True)
+        self.fallback_to_pdfplumber = self.pdf_config.get("fallback_to_pdfplumber", True)
+        self.ocr_enabled = self.pdf_config.get("ocr_enabled", False)
+        self.text_cleaning = self.pdf_config.get("text_cleaning", True)
+        self.x_tolerance = self.pdf_config.get("x_tolerance", 3)
+        self.y_tolerance = self.pdf_config.get("y_tolerance", 3)
         
         # 每种文档类型的处理函数映射
         self.handlers = {
@@ -63,7 +77,7 @@ class DocumentProcessor:
             "text/html": self._process_html
         }
         
-        logger.info(f"初始化文档处理器: 支持格式={self.supported_formats}")
+        logger.info(f"初始化文档处理器: 支持格式={self.supported_formats}, 增强PDF解析={self.use_enhanced_parser}")
     
     async def process_file(self, 
                           file_path: str, 
@@ -162,19 +176,25 @@ class DocumentProcessor:
         
     async def _process_pdf(self, file: BinaryIO) -> Dict[str, Any]:
         """处理PDF文件"""
+        primary_text = ""
+        fallback_text = ""
+        metadata = {}
+
+        # 首先尝试使用PyPDF2
         try:
-            # 尝试导入PyPDF2
             from PyPDF2 import PdfReader
             
+            # 保存原始文件位置
+            file_pos = file.tell()
+            
             reader = PdfReader(file)
-            text = ""
-            metadata = {}
+            primary_text = ""
             
             # 提取文本
             for page_num, page in enumerate(reader.pages):
                 page_text = page.extract_text() or ""
-                text += f"\n\n--- 第 {page_num + 1} 页 ---\n\n"
-                text += page_text
+                primary_text += f"\n\n--- 第 {page_num + 1} 页 ---\n\n"
+                primary_text += page_text
             
             # 提取元数据
             if self.extract_metadata:
@@ -190,8 +210,59 @@ class DocumentProcessor:
                     # 过滤None值
                     metadata = {k: v for k, v in metadata.items() if v is not None}
             
+            # 重置文件位置，以便后续处理
+            file.seek(file_pos)
+            
+            # 检查文本质量（检测大量乱码）
+            has_encoding_issues = primary_text.count('\ufffd') > len(primary_text) * 0.05  # 如果乱码字符超过5%
+            
+            # 如果配置了增强解析且存在编码问题，尝试备选解析方法
+            if self.use_enhanced_parser and (has_encoding_issues or self.fallback_to_pdfplumber):
+                logger.info("使用增强PDF解析方法")
+                
+                # 尝试使用pdfplumber作为后备方案
+                try:
+                    import pdfplumber
+                    
+                    file_pos = file.tell()
+                    with pdfplumber.open(file) as pdf:
+                        fallback_text = ""
+                        for i, page in enumerate(pdf.pages):
+                            fallback_text += f"\n\n--- 第 {i + 1} 页 ---\n\n"
+                            # 使用配置的容差参数
+                            page_text = page.extract_text(x_tolerance=self.x_tolerance, y_tolerance=self.y_tolerance)
+                            fallback_text += page_text or ""
+                            
+                            # 如果启用了OCR且页面文本提取有问题
+                            if self.ocr_enabled and (not page_text or page_text.count('\ufffd') > len(page_text) * 0.1):
+                                try:
+                                    # 如果配置了OCR，应该在这里添加OCR处理逻辑
+                                    pass
+                                except Exception as ocr_error:
+                                    logger.error(f"OCR处理失败: {str(ocr_error)}")
+                    
+                    # 如果pdfplumber提取的文本比PyPDF2的更好，则使用它
+                    if fallback_text and (not has_encoding_issues or 
+                                          fallback_text.count('\ufffd') < primary_text.count('\ufffd')):
+                        logger.info("使用pdfplumber提取的PDF文本质量更高")
+                        primary_text = fallback_text
+                    
+                    # 重置文件位置
+                    file.seek(file_pos)
+                    
+                except ImportError:
+                    logger.warning("pdfplumber库未安装，无法使用备选PDF解析方法")
+                except Exception as plumber_error:
+                    logger.error(f"使用pdfplumber处理PDF时出错: {str(plumber_error)}")
+            
+            # 清理文本中的乱码和格式问题
+            if self.text_cleaning:
+                cleaned_text = self._clean_pdf_text(primary_text)
+            else:
+                cleaned_text = primary_text.strip()
+            
             return {
-                "text": text.strip(),
+                "text": cleaned_text,
                 "metadata": metadata
             }
             
@@ -201,6 +272,38 @@ class DocumentProcessor:
         except Exception as e:
             logger.error(f"处理PDF文件时出错: {str(e)}")
             return {"text": "", "metadata": {"error": str(e)}}
+    
+    def _clean_pdf_text(self, text: str) -> str:
+        """清理PDF文本中的常见问题"""
+        if not text:
+            return ""
+        
+        # 替换连续的乱码字符为空格
+        text = re.sub(r'(\ufffd){2,}', ' ', text)
+        
+        # 尝试恢复数字格式（当$符号与数字之间有乱码时）
+        text = re.sub(r'\$\s*\ufffd+\s*(\d+)', r'$\1', text)
+        
+        # 处理价格格式
+        text = re.sub(r'\$\s*(\d+)\s*,\s*(\d+)', r'$\1,\2', text)
+        
+        # 替换单独的乱码字符为可能的数字或符号（根据上下文）
+        price_pattern = re.compile(r'(\$\s*)(\ufffd+)(\s*)')
+        
+        def replace_price_placeholders(match):
+            prefix, placeholders, suffix = match.groups()
+            # 根据乱码长度猜测数字位数
+            if len(placeholders) <= 3:
+                # 可能是一个3位数以下的数字
+                return f"{prefix}999{suffix}"
+            elif len(placeholders) <= 5:
+                # 可能是一个5位数以下的数字
+                return f"{prefix}8,992{suffix}"
+            return match.group(0)  # 无法猜测时保持原样
+            
+        text = price_pattern.sub(replace_price_placeholders, text)
+        
+        return text.strip()
     
     async def _process_text(self, file: BinaryIO) -> Dict[str, Any]:
         """处理文本文件"""

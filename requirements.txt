@@ -10,11 +10,16 @@ pydantic>=2.4.2
 pyyaml>=6.0.1
 beautifulsoup4>=4.12.2  # 用于HTML解析
 requests>=2.31.0  # 用于HTTP请求
+pandas==2.0.1
 
 # 文档处理
 python-docx>=1.0.1  # 处理Word文档
 pypdf>=3.16.2  # 处理PDF文档
 markdown>=3.5  # 处理Markdown文档
+PyPDF2==3.0.1
+pdfplumber==0.10.2  # 用于更高质量的PDF文本提取
+langdetect==1.0.9
+html2text==2020.1.16
 
 # 嵌入和向量存储
 sentence-transformers>=2.2.2  # 用于文本嵌入
@@ -26,6 +31,7 @@ langchain-community>=0.0.12  # 社区组件
 openai>=1.2.3
 huggingface-hub>=0.19.3
 transformers>=4.34.0
+tiktoken==0.4.0
 
 # 工具和实用程序
 numpy>=1.24.3
@@ -34,9 +40,18 @@ psutil>=5.9.6  # 用于系统资源监控
 tenacity>=8.2.3  # 重试逻辑
 tqdm>=4.66.1  # 进度条
 aiofiles>=23.2.1  # 异步文件操作
+aiohttp==3.8.4
+Pillow==9.5.0
 
 # 开发工具
 pytest>=7.4.2
 black>=23.9.1
 isort>=5.12.0
-flake8>=6.1.0 
+flake8>=6.1.0
+
+# 日志和监控
+logging-config==1.1.0
+prometheus-client==0.16.0
+
+# 可选依赖
+# zhipuai==1.0.7  # 智谱AI接口 

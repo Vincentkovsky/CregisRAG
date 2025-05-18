@@ -19,6 +19,7 @@ import {
   Menu,
   MenuItem,
   Paper,
+  Snackbar,
   Table,
   TableBody,
   TableCell,
@@ -30,6 +31,7 @@ import {
   TextField,
   Tooltip,
   Typography,
+  Alert,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -59,6 +61,7 @@ function Documents({ showNotification }) {
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [documentDetailsOpen, setDocumentDetailsOpen] = useState(false);
   const [filtering, setFiltering] = useState(false);
+  const [deleteInProgress, setDeleteInProgress] = useState(false);
   const [filters, setFilters] = useState({
     fileType: '',
     status: '',
@@ -70,13 +73,24 @@ function Documents({ showNotification }) {
   const fetchDocuments = async () => {
     setLoading(true);
     try {
+      console.log('开始获取文档列表...');
       const response = await ingestAPI.getAllDocuments();
-      setDocuments(response.documents || []);
+      console.log('获取文档列表响应:', response);
+      
+      if (response && response.documents) {
+        console.log(`获取到 ${response.documents.length} 个文档`);
+        setDocuments(response.documents || []);
+      } else {
+        console.warn('获取文档列表响应中没有 documents 字段:', response);
+        setDocuments([]);
+      }
     } catch (error) {
+      console.error('获取文档列表失败:', error);
       showNotification(
         error.message || '获取文档列表失败',
         'error'
       );
+      setDocuments([]);
     } finally {
       setLoading(false);
     }
@@ -84,12 +98,6 @@ function Documents({ showNotification }) {
 
   // 初始化加载
   useEffect(() => {
-    fetchDocuments();
-  }, []);
-
-  // 修复React Hook依赖警告
-  useEffect(() => {
-    // 组件挂载时获取文档
     fetchDocuments();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -152,28 +160,116 @@ function Documents({ showNotification }) {
     handleCloseActionMenu();
   };
 
-  // 删除文档
+  // 打开删除确认对话框
   const handleDeleteConfirm = () => {
     setConfirmDeleteOpen(true);
     handleCloseActionMenu();
   };
 
-  // 确认删除
+  /**
+   * 删除文档
+   */
   const handleDelete = async () => {
-    if (!selectedDocument) return;
-    
-    try {
-      await ingestAPI.deleteDocument(selectedDocument.document_id);
-      showNotification('文档已删除', 'success');
-      fetchDocuments(); // 刷新列表
-    } catch (error) {
-      showNotification(
-        error.message || '删除文档失败',
-        'error'
-      );
+    if (!selectedDocument) {
+      console.warn('尝试删除文档，但没有选中的文档');
+      return;
     }
     
-    setConfirmDeleteOpen(false);
+    try {
+      // 设置删除中状态
+      setDeleteInProgress(true);
+      
+      console.log(`开始删除文档: ${selectedDocument.document_id}`);
+      // 调用API删除文档
+      const response = await ingestAPI.deleteDocument(selectedDocument.document_id);
+      console.log('删除文档API响应:', response);
+      
+      // 显示成功通知
+      showNotification('文档已删除', 'success');
+      
+      // 关闭所有相关对话框
+      setConfirmDeleteOpen(false);
+      
+      // 如果文档详情对话框也是打开的，关闭它
+      if (documentDetailsOpen) {
+        setDocumentDetailsOpen(false);
+      }
+      
+      // 清除选中的文档
+      setSelectedDocument(null);
+      
+      // 刷新文档列表
+      console.log('文档删除成功，开始刷新文档列表');
+      await fetchDocuments();
+      console.log('刷新文档列表完成');
+      
+    } catch (error) {
+      // 记录错误并通知用户
+      console.error('删除文档失败:', error);
+      showNotification(
+        error.message || '删除文档失败，请重试',
+        'error'
+      );
+    } finally {
+      // 重置删除中状态
+      setDeleteInProgress(false);
+    }
+  };
+
+  /**
+   * 批量删除文档
+   * @param {Array<string>} documentIds 要删除的文档ID数组
+   */
+  const bulkDeleteDocuments = async (documentIds) => {
+    if (!documentIds || documentIds.length === 0) {
+      console.warn('尝试批量删除文档，但文档ID列表为空');
+      return;
+    }
+    
+    console.log(`开始批量删除 ${documentIds.length} 个文档:`, documentIds);
+    
+    try {
+      // 设置加载状态
+      setLoading(true);
+      
+      // 统计成功和失败次数
+      let success = 0;
+      let failed = 0;
+      
+      // 顺序删除每个文档以避免并发问题
+      for (const docId of documentIds) {
+        try {
+          console.log(`正在删除文档 ${docId}...`);
+          // 调用API删除文档
+          await ingestAPI.deleteDocument(docId);
+          console.log(`文档 ${docId} 删除成功`);
+          success++;
+        } catch (error) {
+          console.error(`删除文档 ${docId} 失败:`, error);
+          failed++;
+        }
+      }
+      
+      // 显示结果通知
+      if (failed === 0) {
+        showNotification(`已成功删除 ${success} 个文档`, 'success');
+      } else {
+        showNotification(`已删除 ${success} 个文档，${failed} 个文档删除失败`, 'warning');
+      }
+      
+      // 刷新文档列表
+      console.log('批量删除完成，开始刷新文档列表');
+      await fetchDocuments();
+      console.log('文档列表刷新完成');
+      
+    } catch (error) {
+      // 记录错误并通知用户
+      console.error('批量删除文档过程中发生错误:', error);
+      showNotification('批量删除过程中发生错误', 'error');
+    } finally {
+      // 重置加载状态
+      setLoading(false);
+    }
   };
 
   // 刷新文档列表
@@ -237,6 +333,17 @@ function Documents({ showNotification }) {
     if (!dateString) return 'N/A';
     
     return new Date(dateString).toLocaleString();
+  };
+
+  // 检查文档是否可能重复
+  const checkDocumentDuplicates = (filename, fileSize) => {
+    // 根据文件名和大小初步判断可能的重复
+    const possibleDuplicates = documents.filter(doc => 
+      (doc.name === filename || (doc.metadata && doc.metadata.title === filename)) && 
+      Math.abs(doc.file_size - fileSize) < 100  // 允许100字节的误差
+    );
+    
+    return possibleDuplicates;
   };
 
   // 应用筛选和搜索
@@ -586,7 +693,7 @@ function Documents({ showNotification }) {
         {/* 删除确认对话框 */}
         <Dialog
           open={confirmDeleteOpen}
-          onClose={() => setConfirmDeleteOpen(false)}
+          onClose={() => !deleteInProgress && setConfirmDeleteOpen(false)}
         >
           <DialogTitle>确认删除</DialogTitle>
           <DialogContent>
@@ -595,11 +702,20 @@ function Documents({ showNotification }) {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setConfirmDeleteOpen(false)}>
+            <Button 
+              onClick={() => setConfirmDeleteOpen(false)} 
+              disabled={deleteInProgress}
+            >
               取消
             </Button>
-            <Button onClick={handleDelete} color="error" autoFocus>
-              删除
+            <Button 
+              onClick={handleDelete} 
+              color="error" 
+              autoFocus
+              disabled={deleteInProgress}
+              startIcon={deleteInProgress ? <CircularProgress size={20} /> : <DeleteIcon />}
+            >
+              {deleteInProgress ? '删除中...' : '删除'}
             </Button>
           </DialogActions>
         </Dialog>
@@ -717,6 +833,13 @@ function Documents({ showNotification }) {
                 )}
               </DialogContent>
               <DialogActions>
+                <Button
+                  onClick={handleDeleteConfirm}
+                  color="error"
+                  startIcon={<DeleteIcon />}
+                >
+                  删除文档
+                </Button>
                 <Button onClick={() => setDocumentDetailsOpen(false)}>
                   关闭
                 </Button>

@@ -87,7 +87,16 @@ export const ingestAPI = {
 
   // 删除文档
   deleteDocument: (documentId) => {
-    return api.delete(`/ingest/documents/${documentId}`);
+    console.log(`调用删除文档API: /ingest/documents/${documentId}`);
+    return api.delete(`/ingest/documents/${documentId}`)
+      .then(response => {
+        console.log(`删除文档成功，服务器响应:`, response);
+        return response;
+      })
+      .catch(error => {
+        console.error(`删除文档API错误:`, error);
+        throw error;
+      });
   },
   
   // 下载文档

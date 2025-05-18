@@ -180,12 +180,27 @@ function Dashboard({ showNotification }) {
       // 假设统计数据包含vector_store部分
       const vectorStore = response.vector_store || {};
       
-      setDbStats({
-        total_documents: vectorStore.document_count || 0,
-        total_chunks: vectorStore.vector_count || 0,
-        total_embeddings: vectorStore.vector_count || 0,
-        index_size: vectorStore.collection_size || 0,
-      });
+      // 获取所有文档列表以获取文档总数和块总数
+      try {
+        const documentsResponse = await fetch('/api/ingest/documents');
+        const documentsData = await documentsResponse.json();
+        
+        setDbStats({
+          total_documents: documentsData.total_documents || 0,
+          total_chunks: documentsData.total_chunks || 0,
+          total_embeddings: vectorStore.vector_count || 0,
+          index_size: vectorStore.collection_size || 0,
+        });
+      } catch (docError) {
+        console.error('Failed to fetch documents data:', docError);
+        // 如果文档API调用失败，回退到使用统计API数据
+        setDbStats({
+          total_documents: vectorStore.document_count || 0,
+          total_chunks: vectorStore.vector_count || 0,
+          total_embeddings: vectorStore.vector_count || 0,
+          index_size: vectorStore.collection_size || 0,
+        });
+      }
     } catch (error) {
       console.error('Failed to fetch database stats:', error);
     }
@@ -219,9 +234,9 @@ function Dashboard({ showNotification }) {
       
       if (response && response.queries) {
         setRecentQueries(response.queries.map(query => ({
-          id: query.timestamp,
+          id: query.query_id || query.timestamp,
           query: query.query_text,
-          time: query.query_time,
+          time: query.timestamp ? formatDate(query.timestamp) : query.query_time,
           responseTime: query.processing_time.toFixed(2),
           status: 'success'
         })));
@@ -242,10 +257,10 @@ function Dashboard({ showNotification }) {
       
       if (response && response.errors) {
         setRecentErrors(response.errors.map(error => ({
-          id: error.timestamp,
+          id: error.error_id || error.timestamp,
           message: error.message,
           component: error.component,
-          time: error.error_time,
+          time: error.timestamp ? formatDate(error.timestamp) : error.error_time,
           type: error.error_type
         })));
       } else {
@@ -387,7 +402,7 @@ function Dashboard({ showNotification }) {
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                       <DescriptionIcon color="primary" sx={{ mr: 1 }} />
                       <Typography variant="body2">
-                        文档总数: <b>{loading ? '加载中...' : dbStats.total_documents}</b>
+                        源文档总数: <b>{loading ? '加载中...' : dbStats.total_documents}</b>
                       </Typography>
                     </Box>
                   </Grid>
@@ -415,6 +430,13 @@ function Dashboard({ showNotification }) {
                       </Typography>
                     </Box>
                   </Grid>
+                  {dbStats.total_chunks > dbStats.total_documents && (
+                    <Grid item xs={12}>
+                      <Alert severity="info" sx={{ mt: 1 }}>
+                        系统中共有 {dbStats.total_documents} 个源文档，经过分块处理后生成了 {dbStats.total_chunks} 个文本块用于向量检索。
+                      </Alert>
+                    </Grid>
+                  )}
                 </Grid>
               </CardContent>
             </Card>
@@ -509,7 +531,7 @@ function Dashboard({ showNotification }) {
                             </TableCell>
                             <TableCell align="right">
                               <Typography variant="body2">
-                                {query.time || formatDate(query.id)}
+                                {query.time}
                               </Typography>
                             </TableCell>
                           </TableRow>
@@ -550,7 +572,7 @@ function Dashboard({ showNotification }) {
                           {error.message}
                         </Typography>
                         <Typography variant="caption" color="textSecondary">
-                          {error.time || formatDate(error.id)} | {error.component}
+                          {error.time} | {error.component}
                         </Typography>
                       </Alert>
                     ))}

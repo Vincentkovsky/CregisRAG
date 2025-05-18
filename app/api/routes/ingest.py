@@ -319,35 +319,65 @@ async def list_documents(
         # 获取所有文档的元数据
         documents = await rag_engine.vector_store.get_all_documents_metadata()
         
+        # 记录所有获取到的文档
+        logger.info(f"从向量存储获取到 {len(documents)} 个文档条目")
+        logger.info(f"前5个文档ID: {[doc.get('document_id', '无ID') for doc in documents[:5]]}")
+        
+        # 统计不同格式的ID
+        id_formats = {"doc_X_Y": 0, "ID_only": 0, "other": 0}
+        for doc in documents:
+            doc_id = doc.get("document_id", "")
+            if doc_id.startswith("doc_") and doc_id.count("_") >= 2:
+                id_formats["doc_X_Y"] += 1
+            elif doc_id.isdigit():
+                id_formats["ID_only"] += 1
+            else:
+                id_formats["other"] += 1
+        logger.info(f"ID格式统计: {id_formats}")
+        
         # 使用字典来合并源自同一文档的多个块
         doc_groups = {}
         
         for doc in documents:
+            # 记录处理的文档ID
+            doc_id = doc.get("document_id", "")
+            logger.debug(f"处理文档: {doc_id}")
+            
             # 尝试提取源文档的标识符
             # 首先检查文件路径，它对于同一文档的所有块应该相同
             file_path = doc.get("file_path", "")
             original_id = doc.get("original_document_id", "")
             
             # 如果没有原始文档ID，我们从文档ID中提取
-            # 例如，从"doc_1747398373_0"中提取"1747398373"作为分组标识符
-            if not original_id and "_" in doc.get("document_id", ""):
-                parts = doc.get("document_id", "").split("_")
-                if len(parts) >= 3:
-                    # 使用中间部分作为原始文档标识符
+            # 修改ID提取逻辑，更灵活地处理不同格式的ID
+            if not original_id and "_" in doc_id:
+                parts = doc_id.split("_")
+                # 如果格式是 "doc_123456789_0"，使用中间部分
+                if len(parts) >= 3 and parts[0] == "doc":
                     original_id = parts[1]
+                # 如果格式是 "123456789_0"，使用第一部分
+                elif len(parts) >= 2:
+                    original_id = parts[0]
             
             # 如果我们有文件路径或原始ID，使用它作为分组键
             group_key = file_path or original_id
             
-            # 如果没有有效的分组键，使用文件名作为分组键
+            # 如果没有有效的分组键，直接使用文档ID
             if not group_key:
-                group_key = doc.get("filename", doc.get("document_id", ""))
+                group_key = doc_id
+                
+            # 记录我们如何分组此文档
+            if doc_id in [doc.get('document_id', '') for doc in documents[:5]]:
+                logger.info(f"文档 {doc_id} 使用分组键: {group_key}, 原始ID: {original_id}, 文件路径: {file_path}")
             
             # 将文档添加到相应的组
             if group_key not in doc_groups:
+                # 确定文档ID - 如果有原始ID就使用，否则使用当前文档ID
+                display_doc_id = original_id or doc_id
+                
                 doc_groups[group_key] = {
-                    "document_id": original_id or doc.get("document_id", "").split("_")[0] + "_" + original_id if original_id else doc.get("document_id", ""),
-                    "name": doc.get("filename", "未知文件"),
+                    "document_id": display_doc_id,
+                    "name": doc.get("filename", doc.get("file_name", "未知文件")),
                     "upload_date": doc.get("upload_time", ""),
                     "file_size": 0,
                     "status": "completed",
@@ -388,7 +418,7 @@ async def list_documents(
         # 获取状态文件信息并更新状态
         for group_key, group in doc_groups.items():
             # 尝试查找关联的状态文件
-            orig_doc_id = group["document_id"].split("_")[0] if "_" in group["document_id"] else group["document_id"]
+            orig_doc_id = group["document_id"]
             try:
                 status_files = list(Path("data/status").glob(f"{orig_doc_id}*.json"))
                 if status_files:
@@ -401,8 +431,18 @@ async def list_documents(
         
         # 将合并后的文档转换为列表
         formatted_docs = list(doc_groups.values())
+        
+        # 记录详细日志
+        logger.info(f"合并后生成了 {len(formatted_docs)} 个文档组")
+        logger.info(f"文档组分组键: {list(doc_groups.keys())}")
+        logger.info(f"文档组ID: {[doc.get('document_id', '无ID') for doc in formatted_docs]}")
             
-        return {"documents": formatted_docs}
+        return {
+            "documents": formatted_docs,
+            "total_documents": len(formatted_docs),
+            "total_chunks": len(documents),
+            "note": f"文档列表显示的是源文档，每个源文档可能包含多个文本块。虽然系统中有 {len(documents)} 个文档块，但它们被分组为 {len(formatted_docs)} 个源文档。"
+        }
         
     except Exception as e:
         logger.error(f"列出文档时出错: {e}", exc_info=True)
@@ -429,20 +469,106 @@ async def delete_document(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"无法访问向量存储"
             )
+        
+        # 在删除向量之前先获取文档元数据，以便我们能够找到原始文件
+        file_paths_to_delete = []
+        original_filename = None
+        
+        # 获取所有文档的元数据
+        try:
+            all_documents = await rag_engine.vector_store.get_all_documents_metadata()
+            
+            # 查找与当前文档ID相关的所有文档
+            for doc in all_documents:
+                doc_id = doc.get("document_id", "")
+                
+                # 如果直接匹配到文档ID或者文档ID格式为 doc_{document_id}_0
+                if (doc_id == document_id or 
+                    doc_id.startswith(f"doc_{document_id}_") or
+                    doc_id.startswith(f"{document_id}_")):
+                    
+                    # 提取原始文件路径
+                    file_path = doc.get("file_path", "")
+                    if file_path and file_path not in file_paths_to_delete:
+                        file_paths_to_delete.append(file_path)
+                    
+                    # 提取文件名（用于后面的状态文件查找）
+                    filename = doc.get("filename", "")
+                    if filename:
+                        original_filename = filename
+                        
+                    # 通过UUID格式原始文件名查找
+                    orig_file_name = doc.get("file_name", "")
+                    if orig_file_name and "." in orig_file_name:
+                        # 从原始文件名（可能包含路径）中提取基本文件名
+                        base_file_name = os.path.basename(orig_file_name)
+                        raw_file_path = os.path.join("data/raw", base_file_name)
+                        if os.path.exists(raw_file_path) and raw_file_path not in file_paths_to_delete:
+                            file_paths_to_delete.append(raw_file_path)
+                            logger.info(f"找到相关原始文件: {raw_file_path}")
+            
+            logger.info(f"找到 {len(file_paths_to_delete)} 个相关原始文件")
+        except Exception as meta_e:
+            logger.warning(f"获取文档元数据时出错，可能无法删除原始文件: {meta_e}")
             
         # 使用RAG引擎删除文档
         result = await rag_engine.delete_document(document_id)
         
-        # 删除原始文件
+        # 删除原始文件和状态文件
         try:
+            files_deleted = 0
+            
+            # 方法1: 通过从元数据中获取的文件路径删除文件
+            for file_path in file_paths_to_delete:
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                    files_deleted += 1
+                    logger.info(f"已删除文件: {file_path}")
+            
+            # 方法2: 尝试通过直接匹配文档ID查找文件
             raw_files = list(Path("data/raw").glob(f"{document_id}.*"))
             for file in raw_files:
-                os.remove(file)
-                
-            # 删除状态文件
+                if os.path.exists(file):
+                    os.remove(file)
+                    files_deleted += 1
+                    logger.info(f"已删除匹配ID的文件: {file}")
+            
+            # 方法3: 如果我们有原始文件名，尝试查找匹配的文件
+            if original_filename:
+                # 移除扩展名获取基础文件名
+                base_name = os.path.splitext(original_filename)[0]
+                matching_files = list(Path("data/raw").glob(f"*{base_name}*.*"))
+                for file in matching_files:
+                    if os.path.exists(file):
+                        os.remove(file)
+                        files_deleted += 1
+                        logger.info(f"已删除匹配文件名的文件: {file}")
+            
+            # 删除状态文件 - 方法1: 通过文档ID
             status_file = Path(f"data/status/{document_id}.json")
             if status_file.exists():
                 os.remove(status_file)
+                logger.info(f"已删除状态文件: {status_file}")
+                
+            # 删除状态文件 - 方法2: 通过原始文件名
+            for file_path in file_paths_to_delete:
+                if not file_path:
+                    continue
+                    
+                # 提取原始文件名（不含扩展名）
+                base_name = os.path.splitext(os.path.basename(file_path))[0]
+                status_file_path = f"data/status/{base_name}.json"
+                
+                if os.path.exists(status_file_path):
+                    os.remove(status_file_path)
+                    logger.info(f"已删除基于原始文件名的状态文件: {status_file_path}")
+            
+            # 记录删除文件的结果
+            if files_deleted > 0:
+                logger.info(f"共删除了 {files_deleted} 个原始文件")
+            else:
+                logger.warning(f"未找到与文档 {document_id} 相关的原始文件")
+                
         except Exception as e:
             logger.warning(f"删除文件时出错: {e}")
             

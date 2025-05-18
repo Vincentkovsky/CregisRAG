@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -7,6 +7,11 @@ import {
   Chip,
   CircularProgress,
   Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Divider,
   FormControl,
   FormControlLabel,
@@ -23,6 +28,9 @@ import {
   Typography,
   Alert,
   AlertTitle,
+  List,
+  ListItem,
+  ListItemText,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -30,6 +38,7 @@ import ArticleIcon from '@mui/icons-material/Article';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import SettingsIcon from '@mui/icons-material/Settings';
+import WarningIcon from '@mui/icons-material/Warning';
 
 import { ingestAPI } from '../services/api';
 
@@ -66,6 +75,42 @@ function Upload({ showNotification }) {
     extractImages: false,
     indexName: '', // 可选
   });
+  
+  // 重复文件检测状态
+  const [existingDocuments, setExistingDocuments] = useState([]);
+  const [duplicateFileDialog, setDuplicateFileDialog] = useState(false);
+  const [duplicateFiles, setDuplicateFiles] = useState([]);
+  
+  // 加载已有文档列表用于检查重复
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      try {
+        const response = await ingestAPI.getAllDocuments();
+        setExistingDocuments(response.documents || []);
+      } catch (error) {
+        console.error("获取文档列表失败:", error);
+        // 如果无法获取文档列表，设置为空数组
+        setExistingDocuments([]);
+      }
+    };
+    
+    fetchDocuments();
+  }, []);
+
+  // 检查文档是否可能重复
+  const checkDocumentDuplicates = (file) => {
+    // 根据文件名和大小初步判断可能的重复
+    const possibleDuplicates = existingDocuments.filter(doc => 
+      // 检查文件名相似性
+      (doc.name === file.name || 
+       (doc.metadata && doc.metadata.title === file.name) ||
+       doc.name.toLowerCase() === file.name.toLowerCase()) && 
+      // 检查文件大小相似性 (允许100字节的误差)
+      Math.abs(doc.file_size - file.size) < 100
+    );
+    
+    return possibleDuplicates;
+  };
 
   // 处理上传文件变更
   const handleFileChange = (event) => {
@@ -76,16 +121,30 @@ function Upload({ showNotification }) {
     const selectedFiles = Array.from(event.target.files);
     const validFiles = [];
     const invalidFiles = [];
+    const duplicatesFound = [];
 
     selectedFiles.forEach(file => {
       const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
       if (SUPPORTED_FILE_TYPES.includes(fileExtension)) {
+        // 检查文件是否重复
+        const duplicates = checkDocumentDuplicates(file);
+        
+        // 记录重复文件信息
+        if (duplicates && duplicates.length > 0) {
+          duplicatesFound.push({
+            file,
+            duplicates
+          });
+        }
+        
         validFiles.push({
           file,
           id: Date.now() + Math.random().toString(36).substring(2),
           status: UPLOAD_STATUS.READY,
           progress: 0,
           error: null,
+          hasDuplicates: duplicates && duplicates.length > 0,
+          duplicates: duplicates || []
         });
       } else {
         invalidFiles.push(file.name);
@@ -98,10 +157,34 @@ function Upload({ showNotification }) {
         'error'
       );
     }
+    
+    // 显示重复文件提示
+    if (duplicatesFound.length > 0) {
+      setDuplicateFiles(duplicatesFound);
+      setDuplicateFileDialog(true);
+    }
 
     setFiles([...files, ...validFiles]);
     // 重置文件输入框，允许重复选择相同的文件
     event.target.value = null;
+  };
+
+  // 关闭重复文件对话框
+  const handleCloseDuplicateDialog = () => {
+    setDuplicateFileDialog(false);
+  };
+
+  // 处理重复文件处理 - 保留所有文件
+  const handleKeepAllFiles = () => {
+    setDuplicateFileDialog(false);
+  };
+
+  // 处理重复文件处理 - 移除重复文件
+  const handleRemoveDuplicates = () => {
+    // 过滤掉标记为有重复的文件
+    const filteredFiles = files.filter(file => !file.hasDuplicates);
+    setFiles(filteredFiles);
+    setDuplicateFileDialog(false);
   };
 
   // 删除文件
@@ -256,6 +339,19 @@ function Upload({ showNotification }) {
             if (status.status === 'completed') {
               isProcessed = true;
               successCount++;
+              
+              // 将新文档添加到现有文档列表，以便后续检查重复
+              setExistingDocuments(prevDocs => [
+                ...prevDocs, 
+                {
+                  document_id: response.document_id,
+                  name: fileObj.file.name,
+                  file_size: fileObj.file.size,
+                  file_type: fileObj.file.name.split('.').pop().toLowerCase(),
+                  upload_date: new Date().toISOString(),
+                  status: 'completed'
+                }
+              ]);
             } else if (status.status === 'failed') {
               isProcessed = true;
               errorCount++;
@@ -406,6 +502,15 @@ function Upload({ showNotification }) {
                         {getStatusIcon(fileObj.status)}
                         <Typography variant="body1" sx={{ ml: 1, flexGrow: 1 }} noWrap>
                           {fileObj.file.name}
+                          {fileObj.hasDuplicates && (
+                            <Chip 
+                              size="small" 
+                              label="可能重复" 
+                              color="warning" 
+                              icon={<WarningIcon />}
+                              sx={{ ml: 1 }}
+                            />
+                          )}
                         </Typography>
                         <Typography variant="caption" color="textSecondary" sx={{ mx: 1 }}>
                           {(fileObj.file.size / 1024 / 1024).toFixed(2)} MB
@@ -607,9 +712,84 @@ function Upload({ showNotification }) {
             </Grid>
           )}
         </Grid>
+        
+        {/* 重复文件警告对话框 */}
+        <Dialog
+          open={duplicateFileDialog}
+          onClose={handleCloseDuplicateDialog}
+          maxWidth="md"
+          fullWidth
+        >
+          <DialogTitle sx={{ display: 'flex', alignItems: 'center' }}>
+            <WarningIcon color="warning" sx={{ mr: 1 }} />
+            发现可能重复的文档
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText paragraph>
+              以下文件可能与已有文档重复。您可以选择继续上传所有文件，或移除重复文件。
+            </DialogContentText>
+            <List sx={{ bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
+              {duplicateFiles.map((item, index) => (
+                <React.Fragment key={`duplicate-${index}`}>
+                  <ListItem alignItems="flex-start">
+                    <ListItemText
+                      primary={<Typography fontWeight="bold">{item.file.name}</Typography>}
+                      secondary={
+                        <Box>
+                          <Typography component="span" variant="body2" color="text.primary">
+                            大小: {(item.file.size / 1024 / 1024).toFixed(2)} MB
+                          </Typography>
+                          <Typography variant="body2" sx={{ mt: 1 }}>
+                            可能与以下已有文档重复:
+                          </Typography>
+                          <List dense disablePadding>
+                            {item.duplicates.map((duplicate, dupIndex) => (
+                              <ListItem key={`dup-item-${dupIndex}`} dense sx={{ pl: 2 }}>
+                                <ListItemText
+                                  primary={duplicate.name}
+                                  secondary={`大小: ${formatFileSize(duplicate.file_size)} - 上传时间: ${formatDate(duplicate.upload_date)}`}
+                                />
+                              </ListItem>
+                            ))}
+                          </List>
+                        </Box>
+                      }
+                    />
+                  </ListItem>
+                  {index < duplicateFiles.length - 1 && <Divider />}
+                </React.Fragment>
+              ))}
+            </List>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleRemoveDuplicates} color="primary">
+              移除重复文件
+            </Button>
+            <Button onClick={handleKeepAllFiles} color="warning">
+              继续上传所有文件
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </Container>
   );
+  
+  // 格式化文件大小的辅助函数
+  function formatFileSize(bytes) {
+    if (!bytes) return 'N/A';
+    
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    if (bytes === 0) return '0 Byte';
+    const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+    return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+  }
+  
+  // 格式化日期的辅助函数
+  function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    
+    return new Date(dateString).toLocaleString();
+  }
 }
 
 export default Upload; 

@@ -104,19 +104,26 @@ rag:
     回答:
 
 # 文档处理配置
-document_processor:
-  # 文本提取配置
-  text_extraction:
-    pdf_extraction_method: "pdfminer"
-    ocr_enabled: false
-    image_text_extraction: false
-  
-  # 文档元数据提取
-  metadata_extraction:
-    extract_title: true
-    extract_author: true
-    extract_date: true
-    extract_custom_fields: false
+document_processing:
+  extract_metadata: true
+  supported_formats:
+    - pdf
+    - txt
+    - doc
+    - docx
+    - html
+    - md
+  chunk_size: 1000
+  chunk_overlap: 200
+  detect_language: true
+  extract_images: false
+  pdf_processing:
+    use_enhanced_parser: true   # 启用增强的PDF解析器
+    fallback_to_pdfplumber: true  # 在PyPDF2解析质量不佳时使用pdfplumber作为后备
+    ocr_enabled: false  # OCR功能（可选）
+    text_cleaning: true  # 启用文本清理
+    x_tolerance: 3  # pdfplumber的x方向容差
+    y_tolerance: 3  # pdfplumber的y方向容差
 
 # 文本分块配置
 chunker:

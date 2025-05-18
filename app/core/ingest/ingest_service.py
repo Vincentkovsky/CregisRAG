@@ -10,6 +10,7 @@ import json
 import asyncio
 from typing import List, Dict, Any, Optional, Union, Tuple
 import uuid
+import numpy as np
 
 # 配置日志
 logger = logging.getLogger(__name__)
@@ -397,20 +398,67 @@ class IngestService:
                 
             logger.info(f"开始删除文档: {document_id}")
             
-            # 查找所有属于该文档的块
-            filter = {"document_id": document_id}
+            # 获取所有文档
+            all_documents = await self.vector_store.get_all_documents_metadata()
+            if not all_documents:
+                logger.warning(f"向量存储中没有找到任何文档")
+                return {
+                    "status": "success",
+                    "document_id": document_id,
+                    "deleted_chunks": 0,
+                    "message": "向量存储中没有找到任何文档"
+                }
             
-            # 创建一个虚拟查询向量（全为0）
-            query_vector = [0.0] * self.vector_store.embedding_dimension
+            # 查找所有与当前文档ID相关的块
+            # 场景1: 块的document_id直接等于document_id
+            # 场景2: 块的document_id格式为 doc_{document_id}_{index}
+            # 场景3: 块的原始document_id存储在元数据中
+            chunks_to_delete = []
+            for doc in all_documents:
+                doc_id = doc.get("document_id", "")
+                # 场景1: 直接匹配
+                if doc_id == document_id:
+                    chunks_to_delete.append(doc_id)
+                    continue
+                    
+                # 场景2: 格式为 doc_{document_id}_{index}
+                if doc_id.startswith(f"doc_{document_id}_") or doc_id.startswith(f"{document_id}_"):
+                    chunks_to_delete.append(doc_id)
+                    continue
+                    
+                # 场景3: 检查元数据中的original_document_id
+                if doc.get("original_document_id") == document_id:
+                    chunks_to_delete.append(doc_id)
+                    continue
+                    
+                # 检查文件路径中是否包含文档ID
+                file_path = doc.get("file_path", "")
+                if document_id in file_path:
+                    chunks_to_delete.append(doc_id)
+                    continue
             
-            # 检索所有相关块
-            chunks = await self.vector_store.similarity_search(
-                query_vector,
-                top_k=1000,  # 设置较大的值以获取所有块
-                filter=filter
-            )
+            if not chunks_to_delete:
+                # 如果上述方法未找到文档，尝试使用相似度搜索作为备用方法
+                logger.warning(f"通过ID匹配未找到文档，尝试使用相似度搜索作为备选方法")
+                
+                # 查找所有属于该文档的块
+                filter = {"document_id": document_id}
+                
+                # 创建一个虚拟查询向量（全为0）
+                query_vector = np.zeros(self.vector_store.embedding_dimension)
+                
+                # 检索所有相关块
+                search_chunks = await self.vector_store.similarity_search(
+                    query_vector,
+                    top_k=1000,  # 设置较大的值以获取所有块
+                    filter=filter
+                )
+                
+                if search_chunks:
+                    # 提取块ID
+                    chunks_to_delete = [chunk["document_id"] for chunk in search_chunks]
             
-            if not chunks:
+            if not chunks_to_delete:
                 logger.warning(f"未找到属于文档 {document_id} 的块")
                 return {
                     "status": "success",
@@ -419,11 +467,10 @@ class IngestService:
                     "message": "未找到文档块"
                 }
             
-            # 提取块ID
-            chunk_ids = [chunk["document_id"] for chunk in chunks]
+            logger.info(f"找到 {len(chunks_to_delete)} 个需要删除的文档块: {chunks_to_delete}")
             
             # 从向量存储中删除
-            success = await self.vector_store.delete_documents(chunk_ids)
+            success = await self.vector_store.delete_documents(chunks_to_delete)
             
             if not success:
                 raise ValueError("从向量存储删除文档失败")
@@ -433,12 +480,12 @@ class IngestService:
             if os.path.exists(processed_path):
                 os.remove(processed_path)
                 
-            logger.info(f"文档删除成功: {document_id}, 删除了 {len(chunk_ids)} 个块")
+            logger.info(f"文档删除成功: {document_id}, 删除了 {len(chunks_to_delete)} 个块")
             
             return {
                 "status": "success",
                 "document_id": document_id,
-                "deleted_chunks": len(chunk_ids)
+                "deleted_chunks": len(chunks_to_delete)
             }
             
         except Exception as e:
