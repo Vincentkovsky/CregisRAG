@@ -34,10 +34,11 @@ def setup_environment(config):
         os.environ["ANTHROPIC_API_KEY"] = config["llm"]["anthropic"]["api_key"]
     
     # 如果使用Pinecone，设置API密钥
-    if (config["vectordb"]["provider"] == "pinecone" and 
-        config["vectordb"]["pinecone"]["api_key"]):
-        os.environ["PINECONE_API_KEY"] = config["vectordb"]["pinecone"]["api_key"]
-        os.environ["PINECONE_ENVIRONMENT"] = config["vectordb"]["pinecone"]["environment"]
+    if (config["storage"]["vector_store"]["provider"] == "pinecone" and 
+        "pinecone" in config["storage"]["vector_store"] and
+        "api_key" in config["storage"]["vector_store"]["pinecone"]):
+        os.environ["PINECONE_API_KEY"] = config["storage"]["vector_store"]["pinecone"]["api_key"]
+        os.environ["PINECONE_ENVIRONMENT"] = config["storage"]["vector_store"]["pinecone"]["environment"]
 
 
 def setup_directories(config):
@@ -50,9 +51,10 @@ def setup_directories(config):
     ]
     
     # 如果使用Chroma并且需要持久化
-    if (config["vectordb"]["provider"] == "chroma" and 
-        "persist_directory" in config["vectordb"]["chroma"]):
-        directories.append(config["vectordb"]["chroma"]["persist_directory"])
+    if (config["storage"]["vector_store"]["provider"] == "chroma" and 
+        "chroma" in config["storage"]["vector_store"] and
+        "persist_directory" in config["storage"]["vector_store"]["chroma"]):
+        directories.append(config["storage"]["vector_store"]["chroma"]["persist_directory"])
     
     for directory in directories:
         Path(directory).mkdir(parents=True, exist_ok=True)

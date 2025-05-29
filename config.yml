@@ -5,6 +5,9 @@ app:
   name: "CregisRAG"
   description: "企业级检索增强生成系统"
   version: "0.1.0"
+  environment: "development"
+  host: "0.0.0.0"
+  port: 8000
   debug: true
   cors_origins:
     - "http://localhost:3000"
@@ -59,6 +62,12 @@ storage:
   # 文本索引配置（可选）
   use_text_index: false
   normalize_embeddings: true
+  
+  # 目录配置
+  data_dir: "data"
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  embeddings_dir: "data/embeddings"
 
 # LLM服务配置
 llm:

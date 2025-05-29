@@ -9346,3 +9346,265 @@ TypeError: RAGEngine.__init__() missing 3 required positional arguments: 'llm_se
 2025-05-18 18:11:35,980 - app.api.routes.ingest - INFO - 文档组分组键: ['data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf', 'data/raw/41a3c8f8-0c77-443b-8cbf-be94b849ab5d.pdf']
 2025-05-18 18:11:35,980 - app.api.routes.ingest - INFO - 文档组ID: ['1747499298', '1747499335']
 2025-05-18 18:41:06,213 - app.api.main - INFO - API服务正在关闭...
+2025-05-29 14:32:29,795 - app.utils.env_loader - INFO - 从 .env 成功加载了 3 个环境变量
+2025-05-29 14:32:29,795 - app.utils.env_loader - INFO - 已设置 3 个环境变量
+2025-05-29 14:32:29,795 - app.api.main - INFO - 已加载 3 个API密钥
+2025-05-29 14:32:29,799 - app.utils.env_loader - INFO - 从 .env 成功加载了 3 个环境变量
+2025-05-29 14:32:29,799 - app.utils.env_loader - INFO - 已设置 3 个环境变量
+2025-05-29 14:32:29,799 - app.utils.env_loader - INFO - 已加载并设置 3 个环境变量
+2025-05-29 14:32:29,838 - app.core.embedding.text_processor - INFO - 已从data/stopwords/chinese_stopwords.txt加载644个停用词
+2025-05-29 14:32:29,838 - app.core.embedding.text_processor - INFO - 文本预处理器初始化完成
+2025-05-29 14:32:29,838 - app.core.embedding.embedding_service - INFO - 初始化嵌入服务: 提供商=zhipuai, 模型=embedding-3
+2025-05-29 14:32:30,034 - app.core.embedding.embedding_service - INFO - 已获取智谱AI API密钥
+2025-05-29 14:32:30,097 - app.core.embedding.embedding_service - INFO - 初始化智谱AI嵌入服务，模型: embedding-3
+2025-05-29 14:32:30,097 - app.core.embedding.embedding_service - INFO - 嵌入服务初始化成功: zhipuai
+2025-05-29 14:32:30,097 - app.core.generation.llm_service - INFO - 初始化LLM服务: 提供商=zhipuai, 模型=glm-4
+2025-05-29 14:32:30,097 - app.core.generation.llm_service - INFO - 已获取智谱AI API密钥
+2025-05-29 14:32:30,110 - app.core.generation.llm_service - INFO - 初始化智谱AI LLM服务成功, 模型: glm-4
+2025-05-29 14:32:30,110 - app.core.generation.llm_service - INFO - LLM服务初始化成功: zhipuai
+2025-05-29 14:32:30,110 - app.core.retrieval.vector_store - INFO - 初始化Chroma向量存储: 集合=documents, 持久化目录=data/chroma
+2025-05-29 14:32:30,110 - app.core.storage.storage_service - INFO - 存储服务初始化完成
+2025-05-29 14:32:31,108 - app.core.retrieval.vector_store - INFO - 已连接到现有集合: documents
+2025-05-29 14:32:31,108 - app.core.storage.storage_service - INFO - 存储服务初始化成功
+2025-05-29 14:32:31,108 - app.core.rag_engine - INFO - RAG引擎初始化完成
+2025-05-29 14:32:38,588 - app.api.main - INFO - API服务正在关闭...
+2025-05-29 14:32:38,932 - app.utils.env_loader - INFO - 从 .env 成功加载了 3 个环境变量
+2025-05-29 14:32:38,933 - app.utils.env_loader - INFO - 已设置 3 个环境变量
+2025-05-29 14:32:38,933 - app.api.main - INFO - 已加载 3 个API密钥
+2025-05-29 14:32:38,936 - app.utils.env_loader - INFO - 从 .env 成功加载了 3 个环境变量
+2025-05-29 14:32:38,936 - app.utils.env_loader - INFO - 已设置 3 个环境变量
+2025-05-29 14:32:38,936 - app.utils.env_loader - INFO - 已加载并设置 3 个环境变量
+2025-05-29 14:32:38,965 - app.core.embedding.text_processor - INFO - 已从data/stopwords/chinese_stopwords.txt加载644个停用词
+2025-05-29 14:32:38,965 - app.core.embedding.text_processor - INFO - 文本预处理器初始化完成
+2025-05-29 14:32:38,965 - app.core.embedding.embedding_service - INFO - 初始化嵌入服务: 提供商=zhipuai, 模型=embedding-3
+2025-05-29 14:32:39,124 - app.core.embedding.embedding_service - INFO - 已获取智谱AI API密钥
+2025-05-29 14:32:39,162 - app.core.embedding.embedding_service - INFO - 初始化智谱AI嵌入服务，模型: embedding-3
+2025-05-29 14:32:39,162 - app.core.embedding.embedding_service - INFO - 嵌入服务初始化成功: zhipuai
+2025-05-29 14:32:39,162 - app.core.generation.llm_service - INFO - 初始化LLM服务: 提供商=zhipuai, 模型=glm-4
+2025-05-29 14:32:39,162 - app.core.generation.llm_service - INFO - 已获取智谱AI API密钥
+2025-05-29 14:32:39,176 - app.core.generation.llm_service - INFO - 初始化智谱AI LLM服务成功, 模型: glm-4
+2025-05-29 14:32:39,176 - app.core.generation.llm_service - INFO - LLM服务初始化成功: zhipuai
+2025-05-29 14:32:39,176 - app.core.retrieval.vector_store - INFO - 初始化Chroma向量存储: 集合=documents, 持久化目录=data/chroma
+2025-05-29 14:32:39,176 - app.core.storage.storage_service - INFO - 存储服务初始化完成
+2025-05-29 14:32:39,536 - app.core.retrieval.vector_store - INFO - 已连接到现有集合: documents
+2025-05-29 14:32:39,536 - app.core.storage.storage_service - INFO - 存储服务初始化成功
+2025-05-29 14:32:39,536 - app.core.rag_engine - INFO - RAG引擎初始化完成
+2025-05-29 14:33:00,874 - app.api.routes.ingest - INFO - 初始化RAG引擎
+2025-05-29 14:33:00,874 - app.core.generation.llm_service - INFO - 初始化LLM服务: 提供商=zhipuai, 模型=glm-4
+2025-05-29 14:33:00,875 - app.core.embedding.text_processor - INFO - 已从data/stopwords/chinese_stopwords.txt加载644个停用词
+2025-05-29 14:33:00,876 - app.core.embedding.text_processor - INFO - 文本预处理器初始化完成
+2025-05-29 14:33:00,876 - app.core.embedding.embedding_service - INFO - 初始化嵌入服务: 提供商=zhipuai, 模型=embedding-3
+2025-05-29 14:33:00,876 - app.core.retrieval.vector_store - INFO - 初始化Chroma向量存储: 集合=documents, 持久化目录=data/chroma
+2025-05-29 14:33:00,876 - app.core.storage.storage_service - INFO - 存储服务初始化完成
+2025-05-29 14:33:00,876 - app.core.rag_engine - INFO - RAG引擎初始化完成
+2025-05-29 14:33:00,876 - app.core.rag_engine - INFO - 确保LLM服务已初始化...
+2025-05-29 14:33:00,876 - app.core.generation.llm_service - INFO - 已获取智谱AI API密钥
+2025-05-29 14:33:00,907 - app.core.generation.llm_service - INFO - 初始化智谱AI LLM服务成功, 模型: glm-4
+2025-05-29 14:33:00,907 - app.core.generation.llm_service - INFO - LLM服务初始化成功: zhipuai
+2025-05-29 14:33:00,907 - app.core.rag_engine - INFO - 确保嵌入服务已初始化...
+2025-05-29 14:33:00,907 - app.core.embedding.embedding_service - INFO - 已获取智谱AI API密钥
+2025-05-29 14:33:00,927 - app.core.embedding.embedding_service - INFO - 初始化智谱AI嵌入服务，模型: embedding-3
+2025-05-29 14:33:00,927 - app.core.embedding.embedding_service - INFO - 嵌入服务初始化成功: zhipuai
+2025-05-29 14:33:00,927 - app.core.retrieval.vector_store - INFO - 初始化Chroma向量存储: 集合=documents, 持久化目录=./data/chroma
+2025-05-29 14:33:00,935 - app.core.retrieval.vector_store - INFO - 已连接到现有集合: documents
+2025-05-29 14:33:00,935 - app.core.ingest.chunker - INFO - 初始化文本分块器: 方法=paragraph, 块大小=1000, 重叠=200
+2025-05-29 14:33:00,935 - app.core.ingest.document_processor - INFO - 初始化文档处理器: 支持格式=['pdf', 'txt', 'doc', 'docx', 'md', 'html'], 增强PDF解析=True
+2025-05-29 14:33:00,935 - app.core.ingest.ingest_service - INFO - 初始化文档摄入服务
+2025-05-29 14:33:00,935 - app.core.embedding.embedding_service - INFO - 已获取智谱AI API密钥
+2025-05-29 14:33:00,950 - app.core.embedding.embedding_service - INFO - 初始化智谱AI嵌入服务，模型: embedding-3
+2025-05-29 14:33:00,951 - app.core.embedding.embedding_service - INFO - 嵌入服务初始化成功: zhipuai
+2025-05-29 14:33:00,952 - app.core.retrieval.vector_store - INFO - 已连接到现有集合: documents
+2025-05-29 14:33:00,952 - app.core.ingest.ingest_service - INFO - 文档摄入服务初始化成功
+2025-05-29 14:33:00,952 - app.core.rag_engine - INFO - 所有服务初始化完成
+2025-05-29 14:33:00,961 - app.core.retrieval.vector_store - INFO - 已检索 5 个文档的元数据
+2025-05-29 14:33:00,961 - app.api.routes.ingest - INFO - 从向量存储获取到 5 个文档条目
+2025-05-29 14:33:00,961 - app.api.routes.ingest - INFO - 前5个文档ID: ['doc_1747499298_0', 'doc_1747499298_1', 'doc_1747499298_2', 'doc_1747499335_0', 'doc_1747499335_1']
+2025-05-29 14:33:00,961 - app.api.routes.ingest - INFO - ID格式统计: {'doc_X_Y': 5, 'ID_only': 0, 'other': 0}
+2025-05-29 14:33:00,961 - app.api.routes.ingest - INFO - 文档 doc_1747499298_0 使用分组键: data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf, 原始ID: 1747499298, 文件路径: data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf
+2025-05-29 14:33:00,961 - app.api.routes.ingest - INFO - 文档 doc_1747499298_1 使用分组键: data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf, 原始ID: 1747499298, 文件路径: data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf
+2025-05-29 14:33:00,961 - app.api.routes.ingest - INFO - 文档 doc_1747499298_2 使用分组键: data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf, 原始ID: 1747499298, 文件路径: data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf
+2025-05-29 14:33:00,961 - app.api.routes.ingest - INFO - 文档 doc_1747499335_0 使用分组键: data/raw/41a3c8f8-0c77-443b-8cbf-be94b849ab5d.pdf, 原始ID: 1747499335, 文件路径: data/raw/41a3c8f8-0c77-443b-8cbf-be94b849ab5d.pdf
+2025-05-29 14:33:00,961 - app.api.routes.ingest - INFO - 文档 doc_1747499335_1 使用分组键: data/raw/41a3c8f8-0c77-443b-8cbf-be94b849ab5d.pdf, 原始ID: 1747499335, 文件路径: data/raw/41a3c8f8-0c77-443b-8cbf-be94b849ab5d.pdf
+2025-05-29 14:33:00,962 - app.api.routes.ingest - INFO - 合并后生成了 2 个文档组
+2025-05-29 14:33:00,962 - app.api.routes.ingest - INFO - 文档组分组键: ['data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf', 'data/raw/41a3c8f8-0c77-443b-8cbf-be94b849ab5d.pdf']
+2025-05-29 14:33:00,962 - app.api.routes.ingest - INFO - 文档组ID: ['1747499298', '1747499335']
+2025-05-29 14:33:00,968 - app.core.retrieval.vector_store - INFO - 已检索 5 个文档的元数据
+2025-05-29 14:33:00,968 - app.api.routes.ingest - INFO - 从向量存储获取到 5 个文档条目
+2025-05-29 14:33:00,968 - app.api.routes.ingest - INFO - 前5个文档ID: ['doc_1747499298_0', 'doc_1747499298_1', 'doc_1747499298_2', 'doc_1747499335_0', 'doc_1747499335_1']
+2025-05-29 14:33:00,968 - app.api.routes.ingest - INFO - ID格式统计: {'doc_X_Y': 5, 'ID_only': 0, 'other': 0}
+2025-05-29 14:33:00,968 - app.api.routes.ingest - INFO - 文档 doc_1747499298_0 使用分组键: data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf, 原始ID: 1747499298, 文件路径: data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf
+2025-05-29 14:33:00,968 - app.api.routes.ingest - INFO - 文档 doc_1747499298_1 使用分组键: data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf, 原始ID: 1747499298, 文件路径: data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf
+2025-05-29 14:33:00,968 - app.api.routes.ingest - INFO - 文档 doc_1747499298_2 使用分组键: data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf, 原始ID: 1747499298, 文件路径: data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf
+2025-05-29 14:33:00,968 - app.api.routes.ingest - INFO - 文档 doc_1747499335_0 使用分组键: data/raw/41a3c8f8-0c77-443b-8cbf-be94b849ab5d.pdf, 原始ID: 1747499335, 文件路径: data/raw/41a3c8f8-0c77-443b-8cbf-be94b849ab5d.pdf
+2025-05-29 14:33:00,968 - app.api.routes.ingest - INFO - 文档 doc_1747499335_1 使用分组键: data/raw/41a3c8f8-0c77-443b-8cbf-be94b849ab5d.pdf, 原始ID: 1747499335, 文件路径: data/raw/41a3c8f8-0c77-443b-8cbf-be94b849ab5d.pdf
+2025-05-29 14:33:00,969 - app.api.routes.ingest - INFO - 合并后生成了 2 个文档组
+2025-05-29 14:33:00,969 - app.api.routes.ingest - INFO - 文档组分组键: ['data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf', 'data/raw/41a3c8f8-0c77-443b-8cbf-be94b849ab5d.pdf']
+2025-05-29 14:33:00,969 - app.api.routes.ingest - INFO - 文档组ID: ['1747499298', '1747499335']
+2025-05-29 14:33:01,320 - app.core.retrieval.vector_store - INFO - 已检索 5 个文档的元数据
+2025-05-29 14:33:01,320 - app.api.routes.ingest - INFO - 从向量存储获取到 5 个文档条目
+2025-05-29 14:33:01,320 - app.api.routes.ingest - INFO - 前5个文档ID: ['doc_1747499298_0', 'doc_1747499298_1', 'doc_1747499298_2', 'doc_1747499335_0', 'doc_1747499335_1']
+2025-05-29 14:33:01,321 - app.api.routes.ingest - INFO - ID格式统计: {'doc_X_Y': 5, 'ID_only': 0, 'other': 0}
+2025-05-29 14:33:01,321 - app.api.routes.ingest - INFO - 文档 doc_1747499298_0 使用分组键: data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf, 原始ID: 1747499298, 文件路径: data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf
+2025-05-29 14:33:01,321 - app.api.routes.ingest - INFO - 文档 doc_1747499298_1 使用分组键: data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf, 原始ID: 1747499298, 文件路径: data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf
+2025-05-29 14:33:01,321 - app.api.routes.ingest - INFO - 文档 doc_1747499298_2 使用分组键: data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf, 原始ID: 1747499298, 文件路径: data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf
+2025-05-29 14:33:01,321 - app.api.routes.ingest - INFO - 文档 doc_1747499335_0 使用分组键: data/raw/41a3c8f8-0c77-443b-8cbf-be94b849ab5d.pdf, 原始ID: 1747499335, 文件路径: data/raw/41a3c8f8-0c77-443b-8cbf-be94b849ab5d.pdf
+2025-05-29 14:33:01,321 - app.api.routes.ingest - INFO - 文档 doc_1747499335_1 使用分组键: data/raw/41a3c8f8-0c77-443b-8cbf-be94b849ab5d.pdf, 原始ID: 1747499335, 文件路径: data/raw/41a3c8f8-0c77-443b-8cbf-be94b849ab5d.pdf
+2025-05-29 14:33:01,321 - app.api.routes.ingest - INFO - 合并后生成了 2 个文档组
+2025-05-29 14:33:01,321 - app.api.routes.ingest - INFO - 文档组分组键: ['data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf', 'data/raw/41a3c8f8-0c77-443b-8cbf-be94b849ab5d.pdf']
+2025-05-29 14:33:01,321 - app.api.routes.ingest - INFO - 文档组ID: ['1747499298', '1747499335']
+2025-05-29 14:33:01,328 - app.core.retrieval.vector_store - INFO - 已检索 5 个文档的元数据
+2025-05-29 14:33:01,328 - app.api.routes.ingest - INFO - 从向量存储获取到 5 个文档条目
+2025-05-29 14:33:01,328 - app.api.routes.ingest - INFO - 前5个文档ID: ['doc_1747499298_0', 'doc_1747499298_1', 'doc_1747499298_2', 'doc_1747499335_0', 'doc_1747499335_1']
+2025-05-29 14:33:01,328 - app.api.routes.ingest - INFO - ID格式统计: {'doc_X_Y': 5, 'ID_only': 0, 'other': 0}
+2025-05-29 14:33:01,328 - app.api.routes.ingest - INFO - 文档 doc_1747499298_0 使用分组键: data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf, 原始ID: 1747499298, 文件路径: data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf
+2025-05-29 14:33:01,328 - app.api.routes.ingest - INFO - 文档 doc_1747499298_1 使用分组键: data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf, 原始ID: 1747499298, 文件路径: data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf
+2025-05-29 14:33:01,328 - app.api.routes.ingest - INFO - 文档 doc_1747499298_2 使用分组键: data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf, 原始ID: 1747499298, 文件路径: data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf
+2025-05-29 14:33:01,328 - app.api.routes.ingest - INFO - 文档 doc_1747499335_0 使用分组键: data/raw/41a3c8f8-0c77-443b-8cbf-be94b849ab5d.pdf, 原始ID: 1747499335, 文件路径: data/raw/41a3c8f8-0c77-443b-8cbf-be94b849ab5d.pdf
+2025-05-29 14:33:01,328 - app.api.routes.ingest - INFO - 文档 doc_1747499335_1 使用分组键: data/raw/41a3c8f8-0c77-443b-8cbf-be94b849ab5d.pdf, 原始ID: 1747499335, 文件路径: data/raw/41a3c8f8-0c77-443b-8cbf-be94b849ab5d.pdf
+2025-05-29 14:33:01,328 - app.api.routes.ingest - INFO - 合并后生成了 2 个文档组
+2025-05-29 14:33:01,329 - app.api.routes.ingest - INFO - 文档组分组键: ['data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf', 'data/raw/41a3c8f8-0c77-443b-8cbf-be94b849ab5d.pdf']
+2025-05-29 14:33:01,329 - app.api.routes.ingest - INFO - 文档组ID: ['1747499298', '1747499335']
+2025-05-29 14:33:03,865 - app.api.routes.query - INFO - 初始化RAG引擎
+2025-05-29 14:33:03,865 - app.core.generation.llm_service - INFO - 初始化LLM服务: 提供商=zhipuai, 模型=glm-4
+2025-05-29 14:33:03,866 - app.core.embedding.text_processor - INFO - 已从data/stopwords/chinese_stopwords.txt加载644个停用词
+2025-05-29 14:33:03,866 - app.core.embedding.text_processor - INFO - 文本预处理器初始化完成
+2025-05-29 14:33:03,866 - app.core.embedding.embedding_service - INFO - 初始化嵌入服务: 提供商=zhipuai, 模型=embedding-3
+2025-05-29 14:33:03,866 - app.core.retrieval.vector_store - INFO - 初始化Chroma向量存储: 集合=documents, 持久化目录=data/chroma
+2025-05-29 14:33:03,867 - app.core.storage.storage_service - INFO - 存储服务初始化完成
+2025-05-29 14:33:03,867 - app.core.rag_engine - INFO - RAG引擎初始化完成
+2025-05-29 14:33:03,867 - app.core.rag_engine - INFO - 确保LLM服务已初始化...
+2025-05-29 14:33:03,867 - app.core.generation.llm_service - INFO - 已获取智谱AI API密钥
+2025-05-29 14:33:03,896 - app.core.generation.llm_service - INFO - 初始化智谱AI LLM服务成功, 模型: glm-4
+2025-05-29 14:33:03,896 - app.core.generation.llm_service - INFO - LLM服务初始化成功: zhipuai
+2025-05-29 14:33:03,896 - app.core.rag_engine - INFO - 确保嵌入服务已初始化...
+2025-05-29 14:33:03,896 - app.core.embedding.embedding_service - INFO - 已获取智谱AI API密钥
+2025-05-29 14:33:03,915 - app.core.embedding.embedding_service - INFO - 初始化智谱AI嵌入服务，模型: embedding-3
+2025-05-29 14:33:03,915 - app.core.embedding.embedding_service - INFO - 嵌入服务初始化成功: zhipuai
+2025-05-29 14:33:03,915 - app.core.retrieval.vector_store - INFO - 初始化Chroma向量存储: 集合=documents, 持久化目录=./data/chroma
+2025-05-29 14:33:03,917 - app.core.retrieval.vector_store - INFO - 已连接到现有集合: documents
+2025-05-29 14:33:03,917 - app.core.ingest.chunker - INFO - 初始化文本分块器: 方法=paragraph, 块大小=1000, 重叠=200
+2025-05-29 14:33:03,917 - app.core.ingest.document_processor - INFO - 初始化文档处理器: 支持格式=['pdf', 'txt', 'doc', 'docx', 'md', 'html'], 增强PDF解析=True
+2025-05-29 14:33:03,917 - app.core.ingest.ingest_service - INFO - 初始化文档摄入服务
+2025-05-29 14:33:03,917 - app.core.embedding.embedding_service - INFO - 已获取智谱AI API密钥
+2025-05-29 14:33:03,932 - app.core.embedding.embedding_service - INFO - 初始化智谱AI嵌入服务，模型: embedding-3
+2025-05-29 14:33:03,932 - app.core.embedding.embedding_service - INFO - 嵌入服务初始化成功: zhipuai
+2025-05-29 14:33:03,934 - app.core.retrieval.vector_store - INFO - 已连接到现有集合: documents
+2025-05-29 14:33:03,934 - app.core.ingest.ingest_service - INFO - 文档摄入服务初始化成功
+2025-05-29 14:33:03,934 - app.core.rag_engine - INFO - 所有服务初始化完成
+2025-05-29 14:33:03,935 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:03,984 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:04,111 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:04,267 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:04,420 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:04,590 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:04,951 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:05,444 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:05,528 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:05,619 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:05,703 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:06,367 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:06,447 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:06,625 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:06,762 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:07,004 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:07,030 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:07,254 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:07,352 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:07,556 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:07,616 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:07,869 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:08,024 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:08,625 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:08,905 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:09,034 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:09,082 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:09,496 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:09,631 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:09,642 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:09,807 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:09,866 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:10,075 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:10,870 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:11,128 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:11,192 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:11,400 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:11,543 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:11,864 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:33:13,157 - app.api.routes.query - INFO - 接收到查询: 怎么delegate 能量
+2025-05-29 14:33:13,157 - app.core.rag_engine - INFO - 开始处理查询: 怎么delegate 能量
+2025-05-29 14:33:13,158 - jieba - DEBUG - Building prefix dict from the default dictionary ...
+2025-05-29 14:33:13,410 - jieba - DEBUG - Dumping model to file cache /var/folders/lj/nhgwx23s147bp382mjd1md0m0000gn/T/jieba.cache
+2025-05-29 14:33:13,440 - jieba - DEBUG - Loading model cost 0.282 seconds.
+2025-05-29 14:33:13,441 - jieba - DEBUG - Prefix dict has been built successfully.
+2025-05-29 14:33:14,176 - httpx - INFO - HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/embeddings "HTTP/1.1 200 OK"
+2025-05-29 14:33:14,363 - app.core.embedding.embedding_service - INFO - 嵌入完成: 3 个文本, 耗时: 0.69秒
+2025-05-29 14:33:14,363 - app.core.rag_engine - INFO - 开始检索文档: 怎么delegate 能量
+2025-05-29 14:33:14,363 - app.core.storage.storage_service - ERROR - 向量存储集合未初始化，尝试重新初始化
+2025-05-29 14:33:14,368 - app.core.retrieval.vector_store - INFO - 已连接到现有集合: documents
+2025-05-29 14:33:14,384 - chromadb.segment.impl.vector.local_persistent_hnsw - WARNING - Number of requested results 20 is greater than number of elements in index 5, updating n_results = 5
+2025-05-29 14:33:14,391 - app.core.retrieval.vector_store - INFO - 第一个文档结构: {'id': 'doc_1747499298_1', 'text': 'lete the address\ncollection. Please ensure that the transactions are completed within 10 minutes;\notherwise,the energywillbereclaimedafterthe10-minute period.\nAPI Documentation\nAPIURL: https://gastation.cregis.io/api/tron/collect\nRequestMethod: POSTapplication/json\nRequestParameters:\n--- 第 2 页 ---\n\uf06c key: The API validation key provided by the provider. Please ensure that this key is\nstoredsecurelyandnotleaked.\n\uf06c sender:Thesendingaddressforthe transaction,whichneedstheenergy.\nRequestExample:\nCheck Balance\nAPI Description\nAPIURL: https://gastation.cregis.io/api/tron/credit\nRequestMethod: GET\nRequestParameters:\n\uf06c key:The API validationkey,provided bythe provider. Please keepthiskey safeand\ndonotdiscloseit.\nRequestExample:\n--- 第 3 页 ---', 'metadata': {'author': '宇', 'chunk_count': 3, 'chunk_index': 1, 'chunk_overlap': 200, 'chunk_size': 1000, 'chunker': 'recursive', 'creator': 'WPS 文字', 'detect_language': True, 'document_id': '5ac9b267-466f-41d9-9756-99b2678ca2a5', 'extract_images': False, 'extract_metadata': True, 'file_name': '17e04f36-284e-4e20-b356-e61ce488fb6e.pdf', 'file_path': 'data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf', 'file_size': 390775, 'file_type': 'pdf', 'filename': 'Energy Service API Description.pdf', 'mime_type': 'application/pdf', 'page_count': 3, 'producer': 'macOS 版本10.15.7（版号19H2026） Quartz PDFContext', 'upload_time': '2025-05-18 00:28:18'}, 'similarity': 0.5978291895073061}
+2025-05-29 14:33:14,391 - app.core.retrieval.vector_store - INFO - 相似度搜索完成, 匹配 5 个文档, 耗时: 0.02秒
+2025-05-29 14:33:14,394 - app.core.rag_engine - INFO - 检索完成: 找到 5 个文档片段, 耗时: 0.03秒
+2025-05-29 14:33:14,394 - app.core.generation.llm_service - INFO - 开始LLM生成: 模型=glm-4, 温度=0.3
+2025-05-29 14:33:26,371 - httpx - INFO - HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+2025-05-29 14:33:26,375 - app.core.generation.llm_service - INFO - LLM生成完成, 耗时: 11.98秒
+2025-05-29 14:33:26,376 - app.core.rag_engine - INFO - 查询处理完成，耗时: 13.22秒
+2025-05-29 14:34:07,042 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:07,562 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:07,858 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:08,003 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:08,186 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:08,259 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:08,421 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:08,560 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:08,631 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:08,740 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:09,000 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:09,080 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:09,342 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:09,471 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:09,533 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:09,690 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:09,869 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:10,055 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:10,145 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:10,306 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:10,569 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:10,671 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:10,954 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:11,268 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:11,446 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:11,577 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:12,772 - app.api.routes.query - INFO - 接收到查询: how to delegate energy
+2025-05-29 14:34:12,773 - app.core.rag_engine - INFO - 开始处理查询: how to delegate energy
+2025-05-29 14:34:14,017 - httpx - INFO - HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/embeddings "HTTP/1.1 200 OK"
+2025-05-29 14:34:14,088 - app.core.embedding.embedding_service - INFO - 嵌入完成: 1 个文本, 耗时: 1.31秒
+2025-05-29 14:34:14,088 - app.core.rag_engine - INFO - 开始检索文档: how to delegate energy
+2025-05-29 14:34:14,093 - chromadb.segment.impl.vector.local_persistent_hnsw - WARNING - Number of requested results 20 is greater than number of elements in index 5, updating n_results = 5
+2025-05-29 14:34:14,097 - app.core.retrieval.vector_store - INFO - 第一个文档结构: {'id': 'doc_1747499298_0', 'text': 'API Interface Documentation\nTransfer Scenario\nWhen a transfer is needed, this API should be called to obtain energy. You can get\nenergy to send multiple transactions in a single request. Please ensure that the\ntransactions are completed within 10 minutes; otherwise, the energy will be reclaimed\nafterthe10-minute period.\nAPI Documentation\nAPIURL: https://gastation.cregis.io/api/tron/transfer\nRequestMethod: POSTapplication/json\nRequestParameters:\n\uf06c key: TheAPIvalidationkeyprovided bytheprovider.Pleaseensure thatthiskeyis\nstoredsecurelyandnotleaked.\n\uf06c sender: The sendingaddressforthetransaction,whichneedstheenergy.\n\uf06c count: Anintegervaluerepresentingthenumberof transactionstobetransferred.\nRequestExample:\nCollection Scenario\nFor collection scenarios, this API is used to obtain energy and complete the address\ncollection. Please ensure that the transactions are completed within 10 minutes;\notherwise,the energywillbereclaimedafterthe10-minute period.\nAPI Documentation\nAPIURL: https://gastati', 'metadata': {'author': '宇', 'chunk_count': 3, 'chunk_index': 0, 'chunk_overlap': 200, 'chunk_size': 1000, 'chunker': 'recursive', 'creator': 'WPS 文字', 'detect_language': True, 'document_id': '5ac9b267-466f-41d9-9756-99b2678ca2a5', 'extract_images': False, 'extract_metadata': True, 'file_name': '17e04f36-284e-4e20-b356-e61ce488fb6e.pdf', 'file_path': 'data/raw/17e04f36-284e-4e20-b356-e61ce488fb6e.pdf', 'file_size': 390775, 'file_type': 'pdf', 'filename': 'Energy Service API Description.pdf', 'mime_type': 'application/pdf', 'page_count': 3, 'producer': 'macOS 版本10.15.7（版号19H2026） Quartz PDFContext', 'upload_time': '2025-05-18 00:28:18'}, 'similarity': 0.6063161458823947}
+2025-05-29 14:34:14,097 - app.core.retrieval.vector_store - INFO - 相似度搜索完成, 匹配 5 个文档, 耗时: 0.01秒
+2025-05-29 14:34:14,104 - app.core.rag_engine - INFO - 检索完成: 找到 5 个文档片段, 耗时: 0.02秒
+2025-05-29 14:34:14,104 - app.core.generation.llm_service - INFO - 开始LLM生成: 模型=glm-4, 温度=0.3
+2025-05-29 14:34:18,634 - httpx - INFO - HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+2025-05-29 14:34:18,638 - app.core.generation.llm_service - INFO - LLM生成完成, 耗时: 4.53秒
+2025-05-29 14:34:18,638 - app.core.rag_engine - INFO - 查询处理完成，耗时: 5.87秒
+2025-05-29 14:34:27,975 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:28,113 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:28,191 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:28,284 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:28,604 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:29,014 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:29,041 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:29,314 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:29,424 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:29,553 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:30,283 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:30,367 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:30,517 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:30,972 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:31,572 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:31,772 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:31,929 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:32,092 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:34:32,238 - app.api.main - ERROR - 请求验证错误: [{'type': 'missing', 'loc': ('query', 'query'), 'msg': 'Field required', 'input': None}]
+2025-05-29 14:36:29,604 - app.api.main - INFO - API服务正在关闭...
